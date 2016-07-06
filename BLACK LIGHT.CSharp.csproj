@@ -63,19 +63,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Imports\Mirza Beig\Particle Twister\_scripts\DemoManager.cs" />
-    <Compile Include="Assets\Imports\Mirza Beig\Particle Twister\_scripts\FPSDisplay.cs" />
-    <Compile Include="Assets\Imports\Mirza Beig\Particle Twister\_scripts\InstantiatedParticleManager.cs" />
-    <Compile Include="Assets\Imports\Mirza Beig\Particle Twister\_scripts\LoadingScreen.cs" />
-    <Compile Include="Assets\Imports\Mirza Beig\Particle Twister\_scripts\MouseFollow.cs" />
-    <Compile Include="Assets\Imports\Mirza Beig\Particle Twister\_scripts\ParticleLight.cs" />
-    <Compile Include="Assets\Imports\Mirza Beig\Particle Twister\_scripts\ParticleManager.cs" />
-    <Compile Include="Assets\Imports\Mirza Beig\Particle Twister\_scripts\ParticlePrefab.cs" />
-    <Compile Include="Assets\Imports\Mirza Beig\Particle Twister\_scripts\PerpetualParticleManager.cs" />
-    <Compile Include="Assets\Imports\Mirza Beig\Particle Twister\_scripts\Rotate.cs" />
-    <Compile Include="Assets\Imports\Mirza Beig\Particle Twister\_scripts\math\MathUtility.cs" />
-    <Compile Include="Assets\Imports\Mirza Beig\Particle Twister\_scripts\misc\UpdateCallback.cs" />
-    <Compile Include="Assets\Imports\Mirza Beig\Particle Twister\_scripts\time\Timer.cs" />
     <Compile Include="Assets\Scripts\AttackMover.cs" />
     <Compile Include="Assets\Scripts\BasicEnemyController.cs" />
     <Compile Include="Assets\Scripts\CamController.cs" />
@@ -85,7 +72,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Imports\Fantasy SFX for Particle Distort Texture effect library\readme_Fantasy SFX for Particle Distort Texture effect library.txt" />
-    <None Include="Assets\Imports\Mirza Beig\Particle Twister\README.txt" />
     <None Include="Assets\Shaders\AdditiveMask.shader" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
