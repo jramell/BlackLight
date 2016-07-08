@@ -65,10 +65,11 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\AttackMover.cs" />
     <Compile Include="Assets\Scripts\BasicEnemyController.cs" />
-    <Compile Include="Assets\Scripts\CamController.cs" />
     <Compile Include="Assets\Scripts\GameState.cs" />
     <Compile Include="Assets\Scripts\PlayerController.cs" />
+    <Compile Include="Assets\Scripts\PowerUpPlate.cs" />
     <Compile Include="Assets\Scripts\SceneLoader.cs" />
+    <Compile Include="Assets\Scripts\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Imports\Fantasy SFX for Particle Distort Texture effect library\readme_Fantasy SFX for Particle Distort Texture effect library.txt" />

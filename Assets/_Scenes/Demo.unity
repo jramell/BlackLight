@@ -428,6 +428,48 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 255352217}
+--- !u!1001 &301069097
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 466430, guid: 7a12bd0f68676dc4eb23076033a11e35, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: 3.08
+      objectReference: {fileID: 0}
+    - target: {fileID: 466430, guid: 7a12bd0f68676dc4eb23076033a11e35, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 0.96
+      objectReference: {fileID: 0}
+    - target: {fileID: 466430, guid: 7a12bd0f68676dc4eb23076033a11e35, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: 1.3358394
+      objectReference: {fileID: 0}
+    - target: {fileID: 466430, guid: 7a12bd0f68676dc4eb23076033a11e35, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 466430, guid: 7a12bd0f68676dc4eb23076033a11e35, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 466430, guid: 7a12bd0f68676dc4eb23076033a11e35, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 466430, guid: 7a12bd0f68676dc4eb23076033a11e35, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 466430, guid: 7a12bd0f68676dc4eb23076033a11e35, type: 2}
+      propertyPath: m_RootOrder
+      value: 6
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: 7a12bd0f68676dc4eb23076033a11e35, type: 2}
+  m_IsPrefabParent: 0
 --- !u!1 &462072464
 GameObject:
   m_ObjectHideFlags: 0
@@ -1131,8 +1173,8 @@ MonoBehaviour:
   attackRange: 1
   attack: 0
   dashCooldown: 0.5
-  lateralDashForce: 3.5
-  forwardDashForce: 10
+  lateralDashForce: 5
+  forwardDashForce: 8
   dashPrefab: {fileID: 180590, guid: e69d527d13168c04fbd7f3e779e7e3bd, type: 2}
   healthBar: {fileID: 608271968}
   dashMaxStacks: 9
@@ -1140,6 +1182,10 @@ MonoBehaviour:
   dashStackLoadingCounter: {fileID: 1189389900}
   dashNumberText: {fileID: 2814015}
   pauseMenu: {fileID: 1711095816}
+  speedStackEffect: 0
+  timeToActivateVission: 0
+  speedStackLoseTime: 0
+  vissionRadius: 0
 --- !u!82 &1313988570
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1981,10 +2027,10 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: cb0e9df2db7848f4ab282ac4bfe6c73e, type: 3}
+  m_audioClip: {fileID: 8300000, guid: 5fceb38d6bd3f5d4b996ca3445c7947d, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
-  m_Pitch: 0.9
+  m_Pitch: 1
   Loop: 0
   Mute: 0
   Spatialize: 0
@@ -1993,7 +2039,7 @@ AudioSource:
   MinDistance: 1
   MaxDistance: 500
   Pan2D: 0
-  rolloffMode: 1
+  rolloffMode: 0
   BypassEffects: 0
   BypassListenerEffects: 0
   BypassReverbZones: 0

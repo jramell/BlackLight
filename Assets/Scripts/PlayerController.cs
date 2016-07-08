@@ -5,13 +5,11 @@ using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
-
-
     //--------------------------------------------------------------------------------------------------------------
     //Public variables
     //--------------------------------------------------------------------------------------------------------------
 
-    ///Player's speed
+    ///Player's current speed
     public float speed;
 
     ///Attack cooldown
@@ -55,9 +53,24 @@ public class PlayerController : MonoBehaviour
 
     public GameObject pauseMenu;
 
+    //Percentage of speed each speed stack adds
+    public float speedStackEffect;
+
+    //Time shift has to be pressed to activate Vission
+    public float timeToActivateVission;
+
+    //Time a speed stack takes to dissapear
+    public float speedStackLoseTime;
+
+    //Vission radius
+    public float vissionRadius;
+
     //--------------------------------------------------------------------------------------------------------------
     //Private variables
     //--------------------------------------------------------------------------------------------------------------
+
+    //Player's speed without modifiers
+    private float baseSpeed;
 
     ///Ray cast from the player's mouse position. Stored as a variable so it can be updated without allocating a new variable
     ///in each frame
@@ -113,12 +126,24 @@ public class PlayerController : MonoBehaviour
     //Is the game paused?
     private bool isPaused;
 
+    //Number of stacks of speed power up
+    private int speedPowerUpStacks;
+
+    //If true, the time a speed stack takes to be lost will reset 
+    private bool resetSpeedStackLoss;
+
+    //Is the player losing speed stacks right now?
+    private bool losingSpeedStacks;
+
     //--------------------------------------------------------------------------------------------------------------
     //Functions
     //--------------------------------------------------------------------------------------------------------------
 
     void Start()
     {
+        losingSpeedStacks = false;
+        baseSpeed = speed;
+        speedPowerUpStacks = 0;
         isPaused = false;
         dashStackAmount = 0;
         isChargingStacks = false;
@@ -133,7 +158,6 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-
         //So the player is able to rotate relative to the y axis with the camera. This is setup this way so its local axis is synchronized
         //with what the player sees
         transform.localEulerAngles = new Vector3(0, yRot, 0);
@@ -179,7 +203,7 @@ public class PlayerController : MonoBehaviour
             }
 
             //Charge dash
-            if (canChargeStacks() && !isChargingStacks)
+            if (CanChargeStacks() && !isChargingStacks)
             {
                 StartCoroutine(ChargeStacks());
             }
@@ -202,10 +226,32 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    /// Should stacks be charging?
-    bool canChargeStacks()
+    // Should stacks be charging?
+    bool CanChargeStacks()
     {
         return Time.timeScale > 0 && dashStackAmount < dashMaxStacks;
+    }
+
+    IEnumerator ActivateEnergyVission()
+    {
+        float timeShiftHasBeenPressed = 0.0f;
+
+        //If the player stops pressing left shift, the energy vission stops activating
+        while (Input.GetKey(KeyCode.LeftShift))
+        {
+            yield return new WaitForSeconds(0.01f);
+            timeShiftHasBeenPressed += 0.01f;
+            if (timeShiftHasBeenPressed > timeToActivateVission)
+            {
+                ActivateVission();
+                yield break;
+            }
+        }
+    }
+
+    void ActivateVission()
+    {
+        //Identify GameObjects with Physics.OverlapSphere to identify colliders
     }
 
     IEnumerator ChargeStacks()
@@ -226,14 +272,9 @@ public class PlayerController : MonoBehaviour
             Debug.Log(accumulatedStackChargingTime);
         }
 
-        Debug.Log("accum: " + accumulatedStackChargingTime);
-        Debug.Log("stack charge: " + dashStackChargingTime);
-        Debug.Log((int)accumulatedStackChargingTime == (int)dashStackChargingTime);
-
         dashStackAmount += 1;
         accumulatedStackChargingTime = 0.0f;
         isChargingStacks = false;
-        Debug.Log("dashStackAmount: " + dashStackAmount);
         updateDashGraphicalInfo();
     }
 
@@ -372,6 +413,57 @@ public class PlayerController : MonoBehaviour
     bool canDash()
     {
         return Time.time - lastDash > dashCooldown && Time.timeScale > 0 && dashStackAmount > 0;
+    }
+
+    void receivePowerUp(string type)
+    {
+        if (type == Utils.POWER_UP_SPEED)
+        {
+            modifySpeedStacks(1);
+        }
+    }
+
+    IEnumerator LoseSpeedStacks()
+    {
+        float accumulatedTime = 0.0f;
+        losingSpeedStacks = true;
+
+        while (accumulatedTime < speedStackLoseTime)
+        {
+            accumulatedTime += 0.01f;
+            yield return new WaitForSeconds(0.01f);
+            if (resetSpeedStackLoss)
+            {
+                accumulatedTime = 0;
+                resetSpeedStackLoss = false;
+            }
+        }
+    }
+
+    //Will sum the parameter to the current speed stacks
+    void modifySpeedStacks(int sum)
+    {
+        speedPowerUpStacks += sum;
+        speed = baseSpeed * (1 + speedStackEffect * speedPowerUpStacks);
+
+        //Resets 
+        if (speedPowerUpStacks > 0)
+        {
+            if (!losingSpeedStacks)
+            {
+                StartCoroutine(LoseSpeedStacks());
+            }
+
+            else
+            {
+                resetSpeedStackLoss = true;
+            }
+        }
+    }
+
+    void updateStacksGraphicalInfo()
+    {
+        //Updates UI for stacks
     }
 
 }
