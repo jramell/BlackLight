@@ -15,7 +15,13 @@ public class PowerUpPlate : MonoBehaviour {
     {
         if(col.gameObject.tag == "Player")
         {
-            GameObject.Find("Player").SendMessage("receivePowerUp", type);
+            col.gameObject.SendMessage("receivePowerUp", type);
         }
+    }
+
+    public void SetType(string newType)
+    {
+        //Change type to that of the parameter. For this to work correctly, the parameter must be one of the constants in Utils
+        type = newType;
     }
 }

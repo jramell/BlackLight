@@ -9,6 +9,7 @@ GameObject:
   m_Component:
   - 4: {fileID: 466430}
   - 65: {fileID: 6535928}
+  - 114: {fileID: 11412360}
   m_Layer: 0
   m_Name: PowerUpPlate_Spawn
   m_TagString: PowerUpPlate_Spawn
@@ -23,7 +24,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 180586}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.08, y: 0.96, z: 1.3358394}
+  m_LocalPosition: {x: 3.08, y: 1.8, z: 1.3358394}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -40,6 +41,18 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.01, y: 0.01, z: 0.01}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &11412360
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 180586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9fea469c6436df4696f84681d87df26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  powerUpPlatePrefab: {fileID: 132808, guid: 03310cf8777aa4040a6877f405e7a53a, type: 2}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

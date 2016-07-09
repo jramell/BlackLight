@@ -65,6 +65,8 @@ public class PlayerController : MonoBehaviour
     //Vission radius
     public float vissionRadius;
 
+    public GameObject visorUI;
+
     //--------------------------------------------------------------------------------------------------------------
     //Private variables
     //--------------------------------------------------------------------------------------------------------------
@@ -166,7 +168,7 @@ public class PlayerController : MonoBehaviour
         camera.transform.localEulerAngles = new Vector3(xRot, 0, 0);
 
         //Only able to do this is 
-        if (!isPaused)
+        if (!isPaused && !isDead)
         {
             //Updates the ray casted onto the screen for various purposes
             ray = new Ray(camera.transform.position, camera.transform.forward * attackRange);
@@ -185,7 +187,7 @@ public class PlayerController : MonoBehaviour
 
             xRot = Mathf.Clamp(xRot, -55, 35);
             //Receive input for attack
-            if (Input.GetMouseButton(0) && !isDead)
+            if (Input.GetMouseButton(0))
             {
                 StartCoroutine(Attack());
             }
@@ -197,15 +199,17 @@ public class PlayerController : MonoBehaviour
             }
 
             //Receive input for dash
-            if (!isDead)
-            {
                 Dash();
-            }
 
             //Charge dash
             if (CanChargeStacks() && !isChargingStacks)
             {
                 StartCoroutine(ChargeStacks());
+            }
+
+            if(Input.GetKeyDown(KeyCode.X))
+            {
+                StartCoroutine(ActivateEnergyVission());
             }
 
         }
@@ -236,14 +240,17 @@ public class PlayerController : MonoBehaviour
     {
         float timeShiftHasBeenPressed = 0.0f;
 
-        //If the player stops pressing left shift, the energy vission stops activating
-        while (Input.GetKey(KeyCode.LeftShift))
+        //If the player stops pressing X, the energy vission stops activating
+        while (Input.GetKey(KeyCode.X))
         {
             yield return new WaitForSeconds(0.01f);
             timeShiftHasBeenPressed += 0.01f;
             if (timeShiftHasBeenPressed > timeToActivateVission)
             {
+                visorUI.SetActive(true);
+                yield return new WaitForSeconds(0.1f);
                 ActivateVission();
+                visorUI.SetActive(false);
                 yield break;
             }
         }
@@ -252,15 +259,22 @@ public class PlayerController : MonoBehaviour
     void ActivateVission()
     {
         //Identify GameObjects with Physics.OverlapSphere to identify colliders
+        Collider[] colliders = Physics.OverlapSphere(transform.position, vissionRadius);
+        for(int i = 0; i < colliders.Length; i++)
+        {
+            Debug.Log(colliders[i].gameObject.tag);
+            if (colliders[i].gameObject.tag == "PowerUpPlate_Spawn")
+            {
+                colliders[i].gameObject.SendMessage("SpawnPowerUpPlate");
+            }
+        }
     }
 
     IEnumerator ChargeStacks()
     {
-        Debug.Log("ChargeStacks started");
         //Updates time counter every 1/100 of a second, and because floating point numbers can't be 
         //compared to maximum precision, this means it will take at most an extra 1/100 of a second
         //charging 
-
         float accumulatedStackChargingTime = 0.0f;
         isChargingStacks = true;
 
@@ -269,7 +283,6 @@ public class PlayerController : MonoBehaviour
             yield return new WaitForSeconds(0.01f);
             accumulatedStackChargingTime += 0.01f;
             dashStackLoadingCounter.fillAmount = Mathf.Max(0, (float)accumulatedStackChargingTime / dashStackChargingTime);
-            Debug.Log(accumulatedStackChargingTime);
         }
 
         dashStackAmount += 1;
@@ -357,7 +370,6 @@ public class PlayerController : MonoBehaviour
             if (Input.GetKey(KeyCode.Q))
             {
                 //Dash left
-                Debug.Log("Dash Left");
                 rigidbody.AddRelativeForce(new Vector3(-lateralDashForce, 0, 0), ForceMode.VelocityChange);
                 updateDashInfo();
             }
@@ -372,7 +384,6 @@ public class PlayerController : MonoBehaviour
             else if (Input.GetKey(KeyCode.R) || Input.GetMouseButton(2))
             {
                 //Dash forward
-                Debug.Log("Dash forward");
                 rigidbody.AddRelativeForce(new Vector3(0, 0, forwardDashForce), ForceMode.VelocityChange);
                 updateDashInfo();
             }
