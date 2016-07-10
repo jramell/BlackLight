@@ -67,6 +67,8 @@ public class PlayerController : MonoBehaviour
 
     public GameObject visorUI;
 
+    public Image speedStackForeground;
+
     //--------------------------------------------------------------------------------------------------------------
     //Private variables
     //--------------------------------------------------------------------------------------------------------------
@@ -166,6 +168,8 @@ public class PlayerController : MonoBehaviour
 
         //So only the camera rotates relative to the x axis, not the player
         camera.transform.localEulerAngles = new Vector3(xRot, 0, 0);
+
+        speedStackForeground.fillAmount -= 0.01f;
 
         //Only able to do this is 
         if (!isPaused && !isDead)
