@@ -37,21 +37,11 @@ public class PlayerController : MonoBehaviour
 
     public float forwardDashForce;
 
-    public GameObject dashPrefab;
-
-    public Image healthBar;
-
     //Maximum dash stacks 
     public int dashMaxStacks;
 
     //Time a dash stack takes to charge
     public float dashStackChargingTime;
-
-    public Image dashStackLoadingCounter;
-
-    public Text dashNumberText;
-
-    public GameObject pauseMenu;
 
     //Percentage of speed each speed stack adds
     public float speedStackEffect;
@@ -65,10 +55,23 @@ public class PlayerController : MonoBehaviour
     //Vission radius
     public float vissionRadius;
 
+    public int maxSpeedStacks;
+
+    public Image healthBar;
+
+    public Image dashStackLoadingCounter;
+
+    public Text dashNumberText;
+
+    public GameObject pauseMenu;
+
     public GameObject visorUI;
 
     public Image speedStackForeground;
 
+    public GameObject speedStackBackground;
+
+    public Text speedStackText;
     //--------------------------------------------------------------------------------------------------------------
     //Private variables
     //--------------------------------------------------------------------------------------------------------------
@@ -139,12 +142,20 @@ public class PlayerController : MonoBehaviour
     //Is the player losing speed stacks right now?
     private bool losingSpeedStacks;
 
+    private float baseForwardDashForce;
+
+    private float baseLateralDashForce;
+
+    private AudioSource deathSound;
+
     //--------------------------------------------------------------------------------------------------------------
     //Functions
     //--------------------------------------------------------------------------------------------------------------
 
     void Start()
     {
+        baseForwardDashForce = forwardDashForce;
+        baseLateralDashForce = lateralDashForce;
         losingSpeedStacks = false;
         baseSpeed = speed;
         speedPowerUpStacks = 0;
@@ -158,6 +169,7 @@ public class PlayerController : MonoBehaviour
         crosshairFail = GameObject.Find("Crosshair_Fail").GetComponent<Image>();
         attackFail = GameObject.FindGameObjectWithTag("Player").GetComponents<AudioSource>()[0];
         attackSuccess = GameObject.FindGameObjectWithTag("Player").GetComponents<AudioSource>()[1];
+        deathSound = GameObject.FindGameObjectWithTag("Player").GetComponents<AudioSource>()[2];
     }
 
     void Update()
@@ -168,8 +180,6 @@ public class PlayerController : MonoBehaviour
 
         //So only the camera rotates relative to the x axis, not the player
         camera.transform.localEulerAngles = new Vector3(xRot, 0, 0);
-
-        speedStackForeground.fillAmount -= 0.01f;
 
         //Only able to do this is 
         if (!isPaused && !isDead)
@@ -203,7 +213,7 @@ public class PlayerController : MonoBehaviour
             }
 
             //Receive input for dash
-                Dash();
+            Dash();
 
             //Charge dash
             if (CanChargeStacks() && !isChargingStacks)
@@ -211,11 +221,10 @@ public class PlayerController : MonoBehaviour
                 StartCoroutine(ChargeStacks());
             }
 
-            if(Input.GetKeyDown(KeyCode.X))
+            if (Input.GetKeyDown(KeyCode.X))
             {
                 StartCoroutine(ActivateEnergyVission());
             }
-
         }
 
         //Get input for pause
@@ -264,7 +273,7 @@ public class PlayerController : MonoBehaviour
     {
         //Identify GameObjects with Physics.OverlapSphere to identify colliders
         Collider[] colliders = Physics.OverlapSphere(transform.position, vissionRadius);
-        for(int i = 0; i < colliders.Length; i++)
+        for (int i = 0; i < colliders.Length; i++)
         {
             Debug.Log(colliders[i].gameObject.tag);
             if (colliders[i].gameObject.tag == "PowerUpPlate_Spawn")
@@ -357,6 +366,7 @@ public class PlayerController : MonoBehaviour
     void Die()
     {
         isDead = true;
+        deathSound.Play();
         GameObject.Find("img_GameOverScreen").GetComponent<Image>().enabled = true;
         GameObject.Find("txt_GameOverText").GetComponent<Text>().enabled = true;
         GameObject.Find("txt_RetryText").GetComponent<Text>().enabled = true;
@@ -401,7 +411,6 @@ public class PlayerController : MonoBehaviour
         updateDashGraphicalInfo();
     }
 
-    //Should organize code into a method that updates all graphical elements
     void updateDashGraphicalInfo()
     {
         dashNumberText.text = dashStackAmount.ToString();
@@ -452,18 +461,36 @@ public class PlayerController : MonoBehaviour
                 accumulatedTime = 0;
                 resetSpeedStackLoss = false;
             }
+            speedStackForeground.fillAmount = 1 - accumulatedTime / speedStackLoseTime;
         }
+
+        losingSpeedStacks = false;
+        modifySpeedStacks(-1);
     }
 
     //Will sum the parameter to the current speed stacks
     void modifySpeedStacks(int sum)
     {
         speedPowerUpStacks += sum;
-        speed = baseSpeed * (1 + speedStackEffect * speedPowerUpStacks);
+
+        if(speedPowerUpStacks > maxSpeedStacks)
+        {
+            speedPowerUpStacks = maxSpeedStacks;
+        }
+
+        float effect = 1 + speedStackEffect * speedPowerUpStacks;
+        speed = baseSpeed * effect;
+
+        //Modify dash force in the same way speed is
+        forwardDashForce = baseForwardDashForce * effect;
+        lateralDashForce = baseLateralDashForce * effect;
+        speedStackText.text = speedPowerUpStacks.ToString();
 
         //Resets 
         if (speedPowerUpStacks > 0)
         {
+            speedStackBackground.SetActive(true);
+            
             if (!losingSpeedStacks)
             {
                 StartCoroutine(LoseSpeedStacks());
@@ -473,6 +500,11 @@ public class PlayerController : MonoBehaviour
             {
                 resetSpeedStackLoss = true;
             }
+        }
+
+        else
+        {
+            speedStackBackground.SetActive(false);
         }
     }
 

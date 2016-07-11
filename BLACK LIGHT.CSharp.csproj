@@ -71,14 +71,6 @@
     <Compile Include="Assets\Scripts\PowerUpPlateSpawner.cs" />
     <Compile Include="Assets\Scripts\SceneLoader.cs" />
     <Compile Include="Assets\Scripts\Utils.cs" />
-    <Compile Include="Assets\devandart\Polygonix\Scripts\Collectable.cs" />
-    <Compile Include="Assets\devandart\Polygonix\Scripts\CollectableEventArgs.cs" />
-    <Compile Include="Assets\devandart\Polygonix\Scripts\ComboText.cs" />
-    <Compile Include="Assets\devandart\Polygonix\Scripts\GameManager.cs" />
-    <Compile Include="Assets\devandart\Polygonix\Scripts\PolygonMath.cs" />
-    <Compile Include="Assets\devandart\Polygonix\Scripts\PolygonPainter.cs" />
-    <Compile Include="Assets\devandart\Polygonix\Scripts\PolygonPainterEventArgs.cs" />
-    <Compile Include="Assets\devandart\Polygonix\Scripts\UIFunctions.cs" />
     <Compile Include="Assets\devandart\Polygonix\Standard Assets\Effects\ImageEffects\Scripts\Antialiasing.cs" />
     <Compile Include="Assets\devandart\Polygonix\Standard Assets\Effects\ImageEffects\Scripts\Bloom.cs" />
     <Compile Include="Assets\devandart\Polygonix\Standard Assets\Effects\ImageEffects\Scripts\BloomAndFlares.cs" />

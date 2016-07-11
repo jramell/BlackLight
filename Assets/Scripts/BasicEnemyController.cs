@@ -26,6 +26,7 @@ public class BasicEnemyController : MonoBehaviour
 
     private bool isDead;
 
+    //Unused something
     private bool seriousFight;
 
     void Start()
@@ -54,8 +55,10 @@ public class BasicEnemyController : MonoBehaviour
             {
                 lastAttackCooldown = attackCooldown;
             }
+
             lastAttack = Time.time;
             Object instantiated = Instantiate(attackObject, attackSpawner.transform.position, transform.rotation);
+            GetComponent<AudioSource>().Play();
             Destroy(instantiated, 3);
         }
     }

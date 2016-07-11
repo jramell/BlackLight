@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class PowerUpPlateSpawner : MonoBehaviour {
+public class PowerUpPlateSpawner : MonoBehaviour
+{
 
     public GameObject powerUpPlatePrefab;
 
@@ -16,7 +17,7 @@ public class PowerUpPlateSpawner : MonoBehaviour {
     {
         if (!spawned)
         {
-        Instantiate(powerUpPlatePrefab, transform.position, Quaternion.identity);
+            Instantiate(powerUpPlatePrefab, transform.position, Quaternion.identity);
             spawned = true;
         }
     }

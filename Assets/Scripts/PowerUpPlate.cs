@@ -16,6 +16,7 @@ public class PowerUpPlate : MonoBehaviour {
         if(col.gameObject.tag == "Player")
         {
             col.gameObject.SendMessage("receivePowerUp", type);
+            gameObject.GetComponent<AudioSource>().Play();
         }
     }
 
