@@ -72,6 +72,7 @@ public class PlayerController : MonoBehaviour
     public GameObject speedStackBackground;
 
     public Text speedStackText;
+
     //--------------------------------------------------------------------------------------------------------------
     //Private variables
     //--------------------------------------------------------------------------------------------------------------
@@ -508,9 +509,23 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void updateStacksGraphicalInfo()
+    void UpdateStacksGraphicalInfo()
     {
         //Updates UI for stacks
+    }
+
+    void IncreaseSensitivity()
+    {
+        sensitivity += 1;
+        sensitivity = Mathf.Clamp(sensitivity, 1, 10);
+        GameObject.Find("MenuController").SendMessage("UpdateSensitivityText", sensitivity.ToString());
+    }
+
+    void DecreaseSensitivity()
+    {
+        sensitivity -= 1;
+        sensitivity = Mathf.Clamp(sensitivity, 1, 10);
+        GameObject.Find("MenuController").SendMessage("UpdateSensitivityText", sensitivity.ToString());
     }
 
 }
