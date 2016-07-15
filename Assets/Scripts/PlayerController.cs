@@ -73,6 +73,8 @@ public class PlayerController : MonoBehaviour
 
     public Text speedStackText;
 
+    public GameObject damageEffect;
+
     //--------------------------------------------------------------------------------------------------------------
     //Private variables
     //--------------------------------------------------------------------------------------------------------------
@@ -147,7 +149,11 @@ public class PlayerController : MonoBehaviour
 
     private float baseLateralDashForce;
 
+    //Sound effect played at death
     private AudioSource deathSound;
+
+    //Sound effect played at death
+    private AudioSource damageSoundEffect;
 
     //--------------------------------------------------------------------------------------------------------------
     //Functions
@@ -155,6 +161,7 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
+        maxHealthPoints = healthPoints;
         baseForwardDashForce = forwardDashForce;
         baseLateralDashForce = lateralDashForce;
         losingSpeedStacks = false;
@@ -171,6 +178,7 @@ public class PlayerController : MonoBehaviour
         attackFail = GameObject.FindGameObjectWithTag("Player").GetComponents<AudioSource>()[0];
         attackSuccess = GameObject.FindGameObjectWithTag("Player").GetComponents<AudioSource>()[1];
         deathSound = GameObject.FindGameObjectWithTag("Player").GetComponents<AudioSource>()[2];
+        damageSoundEffect = GameObject.FindGameObjectWithTag("Player").GetComponents<AudioSource>()[3];
     }
 
     void Update()
@@ -276,6 +284,7 @@ public class PlayerController : MonoBehaviour
         Collider[] colliders = Physics.OverlapSphere(transform.position, vissionRadius);
         for (int i = 0; i < colliders.Length; i++)
         {
+            Debug.Log(colliders[i].gameObject.name);
             Debug.Log(colliders[i].gameObject.tag);
             if (colliders[i].gameObject.tag == "PowerUpPlate_Spawn")
             {
@@ -350,17 +359,30 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    IEnumerator DisplayDamageEffect()
+    {
+        damageEffect.SetActive(true);
+        yield return new WaitForSeconds(0.2f);
+        damageEffect.SetActive(false);
+    }
+
     //Should be called everytime the player takes damage
     void TakeDamage(int damage)
     {
-        healthPoints -= damage;
-
-        //'Max' it doesn't take negative values
-        healthBar.fillAmount = Mathf.Max(0, (float)healthPoints / maxHealthPoints);
-
-        if (healthPoints <= 0)
+        if (!isDead)
         {
-            Die();
+            healthPoints -= damage;
+            StartCoroutine(DisplayDamageEffect());
+
+            //'Max' it doesn't take negative values
+            healthBar.fillAmount = Mathf.Max(0, (float)healthPoints / maxHealthPoints);
+
+            damageSoundEffect.Play();
+
+            if (healthPoints <= 0)
+            {
+                Die();
+            }
         }
     }
 
@@ -375,7 +397,7 @@ public class PlayerController : MonoBehaviour
 
     void Retry()
     {
-        SceneManager.LoadScene("Demo");
+        SceneManager.LoadScene("Test");
     }
 
     void Dash()
@@ -527,5 +549,4 @@ public class PlayerController : MonoBehaviour
         sensitivity = Mathf.Clamp(sensitivity, 1, 10);
         GameObject.Find("MenuController").SendMessage("UpdateSensitivityText", sensitivity.ToString());
     }
-
 }
