@@ -12,16 +12,9 @@ public class MenuController : MonoBehaviour {
 
     public GameObject optionsUI;
 
-    void Start()
-    {
-
-    }
-
     //--------------------------------------------------------------------------------------------------------------
     //Option related functions
     //--------------------------------------------------------------------------------------------------------------
-
-
 
     //is executed when the button options is clicked
     public void OnOptionsClick()

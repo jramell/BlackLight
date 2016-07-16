@@ -75,6 +75,8 @@ public class PlayerController : MonoBehaviour
 
     public GameObject damageEffect;
 
+    public GameObject interactText;
+
     //--------------------------------------------------------------------------------------------------------------
     //Private variables
     //--------------------------------------------------------------------------------------------------------------
@@ -155,6 +157,8 @@ public class PlayerController : MonoBehaviour
     //Sound effect played at death
     private AudioSource damageSoundEffect;
 
+    private RaycastHit hit;
+
     //--------------------------------------------------------------------------------------------------------------
     //Functions
     //--------------------------------------------------------------------------------------------------------------
@@ -195,6 +199,30 @@ public class PlayerController : MonoBehaviour
         {
             //Updates the ray casted onto the screen for various purposes
             ray = new Ray(camera.transform.position, camera.transform.forward * attackRange);
+
+            Physics.Raycast(ray.origin, ray.direction, out hit);
+
+            Debug.Log("collider: " + hit.collider);
+
+            if(hit.collider != null)
+            {
+            Debug.Log("collider tag: " + hit.collider.tag);
+            }
+
+            if(hit.collider != null && hit.collider.tag == "Interactive")
+            {
+                hit.collider.gameObject.SendMessage("UpdateInteractionText");
+
+                if (Input.GetKeyDown(KeyCode.F))
+                {
+                    hit.collider.gameObject.SendMessage("DoAction");
+                }
+            }
+
+            else
+            {
+                CleanInteractionText();
+            }
 
             //Moves the player
             Vector3 mov = new Vector3(Input.GetAxis("Horizontal") * speed * Time.deltaTime, 0,
@@ -258,6 +286,16 @@ public class PlayerController : MonoBehaviour
         return Time.timeScale > 0 && dashStackAmount < dashMaxStacks;
     }
 
+    void UpdateInteractionText(string text)
+    {
+        interactText.GetComponent<Text>().text = "[F] " + text;
+    }
+
+    void CleanInteractionText()
+    {
+        interactText.GetComponent<Text>().text = "";
+    }
+
     IEnumerator ActivateEnergyVission()
     {
         float timeShiftHasBeenPressed = 0.0f;
@@ -319,9 +357,6 @@ public class PlayerController : MonoBehaviour
         if (Time.time - lastAttack > attackCooldown)
         {
             lastAttack = Time.time;
-            RaycastHit hit;
-
-            Physics.Raycast(ray.origin, ray.direction, out hit);
 
             if (hit.collider == null || hit.collider.tag != "Enemy")
             {

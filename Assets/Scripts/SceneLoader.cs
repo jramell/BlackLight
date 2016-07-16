@@ -4,8 +4,13 @@ using UnityEngine.SceneManagement;
 
 public class SceneLoader : MonoBehaviour {
 
-	public void LoadDemo()
+	public static void LoadDemo()
     {
         SceneManager.LoadScene("Demo");
+    }
+
+    public static void LoadOpenTutorial()
+    {
+        //Not implemented
     }
 }
