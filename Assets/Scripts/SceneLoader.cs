@@ -1,16 +1,22 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class SceneLoader : MonoBehaviour {
 
-	public static void LoadDemo()
+	public void LoadDemo()
     {
-        SceneManager.LoadScene("Demo");
+        SceneManager.LoadScene("Room");
     }
 
-    public static void LoadOpenTutorial()
+    public void LoadOpenTutorial()
     {
-        //Not implemented
+        SceneManager.LoadScene("Terrain");
+    }
+
+    public static void LoadSceneWithName(string sceneToLoad)
+    {
+        SceneManager.LoadScene(sceneToLoad);
     }
 }

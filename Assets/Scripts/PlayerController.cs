@@ -57,6 +57,8 @@ public class PlayerController : MonoBehaviour
 
     public int maxSpeedStacks;
 
+    public float interactionRange;
+
     public Image healthBar;
 
     public Image dashStackLoadingCounter;
@@ -154,9 +156,6 @@ public class PlayerController : MonoBehaviour
     //Sound effect played at death
     private AudioSource deathSound;
 
-    //Sound effect played at death
-    private AudioSource damageSoundEffect;
-
     private RaycastHit hit;
 
     //--------------------------------------------------------------------------------------------------------------
@@ -182,7 +181,6 @@ public class PlayerController : MonoBehaviour
         attackFail = GameObject.FindGameObjectWithTag("Player").GetComponents<AudioSource>()[0];
         attackSuccess = GameObject.FindGameObjectWithTag("Player").GetComponents<AudioSource>()[1];
         deathSound = GameObject.FindGameObjectWithTag("Player").GetComponents<AudioSource>()[2];
-        damageSoundEffect = GameObject.FindGameObjectWithTag("Player").GetComponents<AudioSource>()[3];
     }
 
     void Update()
@@ -202,14 +200,7 @@ public class PlayerController : MonoBehaviour
 
             Physics.Raycast(ray.origin, ray.direction, out hit);
 
-            Debug.Log("collider: " + hit.collider);
-
-            if(hit.collider != null)
-            {
-            Debug.Log("collider tag: " + hit.collider.tag);
-            }
-
-            if(hit.collider != null && hit.collider.tag == "Interactive")
+            if(hit.collider != null && hit.collider.tag == "Interactive" && hit.distance < interactionRange)
             {
                 hit.collider.gameObject.SendMessage("UpdateInteractionText");
 
@@ -411,8 +402,6 @@ public class PlayerController : MonoBehaviour
 
             //'Max' it doesn't take negative values
             healthBar.fillAmount = Mathf.Max(0, (float)healthPoints / maxHealthPoints);
-
-            damageSoundEffect.Play();
 
             if (healthPoints <= 0)
             {
