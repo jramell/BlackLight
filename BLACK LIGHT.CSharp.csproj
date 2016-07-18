@@ -73,6 +73,7 @@
     <Compile Include="Assets\Scripts\PowerUpPlateSpawner.cs" />
     <Compile Include="Assets\Scripts\SceneChangingDoor.cs" />
     <Compile Include="Assets\Scripts\SceneLoader.cs" />
+    <Compile Include="Assets\Scripts\TutorialController.cs" />
     <Compile Include="Assets\Scripts\Utils.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -7,9 +7,12 @@ using System.Runtime.Serialization.Formatters.Binary;
 public class GameState {
 
 
+    //Save file name
     private const string SAVE_FILE_NAME = "/save.s";
 
+    //url
     private string save_url = Application.persistentDataPath + SAVE_FILE_NAME;
+
 
     /// <summary>
     /// Turns the actual game state into an arraylist following a certain format.
