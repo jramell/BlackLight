@@ -156,6 +156,9 @@ public class PlayerController : MonoBehaviour
     //Sound effect played at death
     private AudioSource deathSound;
 
+    //Should interactions be possible?
+    private bool canInteract;
+
     private RaycastHit hit;
 
     //--------------------------------------------------------------------------------------------------------------
@@ -200,13 +203,16 @@ public class PlayerController : MonoBehaviour
 
             Physics.Raycast(ray.origin, ray.direction, out hit);
 
-            if(hit.collider != null && hit.collider.tag == "Interactive" && hit.distance < interactionRange)
+            if (canInteract)
             {
-                hit.collider.gameObject.SendMessage("UpdateInteractionText");
-
-                if (Input.GetKeyDown(KeyCode.F))
+                if (hit.collider != null && hit.collider.tag == "Interactive" && hit.distance < interactionRange)
                 {
-                    hit.collider.gameObject.SendMessage("DoAction");
+                    hit.collider.gameObject.SendMessage("UpdateInteractionText");
+
+                    if (Input.GetKeyDown(KeyCode.F))
+                    {
+                        hit.collider.gameObject.SendMessage("DoAction");
+                    }
                 }
             }
 
@@ -520,7 +526,7 @@ public class PlayerController : MonoBehaviour
     {
         speedPowerUpStacks += sum;
 
-        if(speedPowerUpStacks > maxSpeedStacks)
+        if (speedPowerUpStacks > maxSpeedStacks)
         {
             speedPowerUpStacks = maxSpeedStacks;
         }
@@ -537,7 +543,7 @@ public class PlayerController : MonoBehaviour
         if (speedPowerUpStacks > 0)
         {
             speedStackBackground.SetActive(true);
-            
+
             if (!losingSpeedStacks)
             {
                 StartCoroutine(LoseSpeedStacks());

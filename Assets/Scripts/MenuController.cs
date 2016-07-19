@@ -2,7 +2,8 @@
 using System.Collections;
 using UnityEngine.UI;
 
-public class MenuController : MonoBehaviour {
+public class MenuController : MonoBehaviour
+{
 
     //Main related variables
     public GameObject mainButtons;
@@ -12,9 +13,29 @@ public class MenuController : MonoBehaviour {
 
     public GameObject optionsUI;
 
+    public GameObject extraAudioContainer;
+
     //--------------------------------------------------------------------------------------------------------------
     //Option related functions
     //--------------------------------------------------------------------------------------------------------------
+
+    void Start()
+    {
+        StartCoroutine(ExtraSound());
+    }
+
+    IEnumerator ExtraSound()
+    {
+        yield return StartCoroutine(Utils.WaitForSecondsRealtime(1.5f));
+
+        AudioSource[] audios = extraAudioContainer.GetComponents<AudioSource>();
+
+        for (int i = 0; i < audios.Length; i++)
+        {
+            audios[i].Play();
+            yield return StartCoroutine(Utils.WaitForSecondsRealtime(audios[i].clip.length));
+        }
+    }
 
     //is executed when the button options is clicked
     public void OnOptionsClick()

@@ -1,10 +1,29 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class TutorialController : MonoBehaviour {
+public class TutorialController : MonoBehaviour
+{
+
+    public Transform frontOfDoor;
+
+    //Speed per frame of Baroth
+    public float speed;
+
+    //--------------------------------------------------------------------------------------------------------------
+    //Variables
+    //--------------------------------------------------------------------------------------------------------------
 
     //Which event is the tutorial currently in?
+    //Event 0: firstDialog plays
+    //Event 1: secondDialog plays. Baroth leaves the room
+    //Event 2: The player is now outside. Baroth explains health bar.
     private static int currentEvent;
+
+    //Should Baroth be moving?
+    private bool shouldMove;
+
+    //Should Baroth leave the room?
+    private bool leave;
 
     //--------------------------------------------------------------------------------------------------------------
     //Audio components
@@ -24,13 +43,26 @@ public class TutorialController : MonoBehaviour {
     //Functions
     //--------------------------------------------------------------------------------------------------------------
 
-    void Start ()
+    void Start()
     {
         AudioSource[] audios = GetComponents<AudioSource>();
         firstDialog = audios[0];
         secondDialog = audios[1];
+        shouldMove = false;
         StartCoroutine(ManageEvents());
-	}
+    }
+
+    void Update()
+    {
+        if (shouldMove)
+        {
+            transform.position = NPCUtils.MoveTo(transform.position, frontOfDoor.position, speed);
+            if (transform.position == frontOfDoor.position)
+            {
+                LeaveRoom();
+            }
+        }
+    }
 
     IEnumerator ManageEvents()
     {
@@ -49,6 +81,8 @@ public class TutorialController : MonoBehaviour {
         {
             secondDialog.Play();
             yield return new WaitForSeconds(secondDialog.clip.length);
+            shouldMove = true;
+            
         }
 
         if (currentEvent == 2)
@@ -60,5 +94,11 @@ public class TutorialController : MonoBehaviour {
         {
 
         }
+    }
+
+    void LeaveRoom()
+    {
+        GameObject.Find("Door").GetComponent<AudioSource>().Play();
+        Destroy(gameObject, GameObject.Find("Door").GetComponent<AudioSource>().clip.length);
     }
 }
