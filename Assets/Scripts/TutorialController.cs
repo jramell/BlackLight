@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
+using System;
 
-public class TutorialController : MonoBehaviour
+public class TutorialController : Interactive
 {
 
     public Transform frontOfDoor;
@@ -9,12 +11,16 @@ public class TutorialController : MonoBehaviour
     //Speed per frame of Baroth
     public float speed;
 
+    public GameObject roomLight;
+
+    public float textWriteDelay;
+
     //--------------------------------------------------------------------------------------------------------------
     //Variables
     //--------------------------------------------------------------------------------------------------------------
 
     //Which event is the tutorial currently in?
-    //Event 0: firstDialog plays
+    //Event 0: Baroth introduces himself and tells the player he is heading towards a dangerous place.
     //Event 1: secondDialog plays. Baroth leaves the room
     //Event 2: The player is now outside. Baroth explains health bar.
     private static int currentEvent;
@@ -26,28 +32,11 @@ public class TutorialController : MonoBehaviour
     private bool leave;
 
     //--------------------------------------------------------------------------------------------------------------
-    //Audio components
-    //--------------------------------------------------------------------------------------------------------------
-
-    //The very first dialog Baroth speaks about how the player must be confused. He asks if the player can speak.
-    //currentEvent == 0
-    private AudioSource firstDialog;
-
-    //The second dialog Baroth speaks about how temporal loss of sensorial capacity is common in newcomers. Explains
-    //the world you are going into is really hostile and dangerous, so he wants to help you. He tells him to go outside
-    //and goes outside himself
-    //currentEvent == 1
-    private AudioSource secondDialog;
-
-    //--------------------------------------------------------------------------------------------------------------
     //Functions
     //--------------------------------------------------------------------------------------------------------------
 
     void Start()
     {
-        AudioSource[] audios = GetComponents<AudioSource>();
-        firstDialog = audios[0];
-        secondDialog = audios[1];
         shouldMove = false;
         StartCoroutine(ManageEvents());
     }
@@ -66,23 +55,17 @@ public class TutorialController : MonoBehaviour
 
     IEnumerator ManageEvents()
     {
+        Debug.Log("started ManageEvents");
         yield return new WaitForSeconds(2);
         if (currentEvent == 0)
         {
-            firstDialog.Play();
-            yield return new WaitForSeconds(firstDialog.clip.length);
-            //Baroth waits for answer
-            yield return new WaitForSeconds(2);
-            //Next dialog
-            currentEvent++;
+           yield return GameObject.Find("Player").GetComponent<PlayerController>().IntroduceText("test text test text test text",
+               GetComponent<AudioSource>(), 1);
         }
 
         if (currentEvent == 1)
         {
-            secondDialog.Play();
-            yield return new WaitForSeconds(secondDialog.clip.length);
-            shouldMove = true;
-            
+
         }
 
         if (currentEvent == 2)
@@ -100,5 +83,15 @@ public class TutorialController : MonoBehaviour
     {
         GameObject.Find("Door").GetComponent<AudioSource>().Play();
         Destroy(gameObject, GameObject.Find("Door").GetComponent<AudioSource>().clip.length);
+
+        //Allows the player to interact with the door
+        GameObject.Find("Player").SendMessage("EnableInteractivity");
+    }
+
+    //Should be moved to Player Controller later
+
+    public override void DoAction()
+    {
+        throw new NotImplementedException();
     }
 }

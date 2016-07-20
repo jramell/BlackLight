@@ -59,6 +59,8 @@ public class PlayerController : MonoBehaviour
 
     public float interactionRange;
 
+    public float textWriteDelay;
+
     public Image healthBar;
 
     public Image dashStackLoadingCounter;
@@ -78,6 +80,8 @@ public class PlayerController : MonoBehaviour
     public GameObject damageEffect;
 
     public GameObject interactText;
+
+    public Text dialogText;
 
     //--------------------------------------------------------------------------------------------------------------
     //Private variables
@@ -188,12 +192,15 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if(dialogText.text == "")
+        {
         //So the player is able to rotate relative to the y axis with the camera. This is setup this way so its local axis is synchronized
         //with what the player sees
         transform.localEulerAngles = new Vector3(0, yRot, 0);
 
         //So only the camera rotates relative to the x axis, not the player
         camera.transform.localEulerAngles = new Vector3(xRot, 0, 0);
+        }
 
         //Only able to do this is 
         if (!isPaused && !isDead)
@@ -203,6 +210,7 @@ public class PlayerController : MonoBehaviour
 
             Physics.Raycast(ray.origin, ray.direction, out hit);
 
+            canInteract = true;
             if (canInteract)
             {
                 if (hit.collider != null && hit.collider.tag == "Interactive" && hit.distance < interactionRange)
@@ -283,7 +291,7 @@ public class PlayerController : MonoBehaviour
         return Time.timeScale > 0 && dashStackAmount < dashMaxStacks;
     }
 
-    void UpdateInteractionText(string text)
+    public void UpdateInteractionText(string text)
     {
         interactText.GetComponent<Text>().text = "[F] " + text;
     }
@@ -578,5 +586,25 @@ public class PlayerController : MonoBehaviour
         sensitivity -= 1;
         sensitivity = Mathf.Clamp(sensitivity, 1, 10);
         GameObject.Find("MenuController").SendMessage("UpdateSensitivityText", sensitivity.ToString());
+    }
+
+    void EnableInteractivity()
+    {
+        canInteract = true;
+    }
+
+    void DisableInteractivity()
+    {
+        canInteract = false;
+    }
+
+    public IEnumerator IntroduceText(string textToIntroduce, AudioSource writingSoundEffect, int numberOfPlays)
+    {
+        yield return StartCoroutine(PlayerUtils.IntroduceText(textToIntroduce, dialogText, textWriteDelay, writingSoundEffect, numberOfPlays));
+    }
+
+    void clearText()
+    {
+        dialogText.text = "";
     }
 }

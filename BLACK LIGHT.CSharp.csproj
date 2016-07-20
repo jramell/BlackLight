@@ -66,7 +66,7 @@
     <Compile Include="Assets\Scripts\AttackMover.cs" />
     <Compile Include="Assets\Scripts\BasicEnemyController.cs" />
     <Compile Include="Assets\Scripts\GameState.cs" />
-    <Compile Include="Assets\Scripts\IInteractable.cs" />
+    <Compile Include="Assets\Scripts\Interactive.cs" />
     <Compile Include="Assets\Scripts\MenuController.cs" />
     <Compile Include="Assets\Scripts\PlayerController.cs" />
     <Compile Include="Assets\Scripts\PowerUpPlate.cs" />
@@ -75,6 +75,7 @@
     <Compile Include="Assets\Scripts\SceneLoader.cs" />
     <Compile Include="Assets\Scripts\TutorialController.cs" />
     <Compile Include="Assets\Scripts\Utils\NPCUtils.cs" />
+    <Compile Include="Assets\Scripts\Utils\PlayerUtils.cs" />
     <Compile Include="Assets\Scripts\Utils\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
