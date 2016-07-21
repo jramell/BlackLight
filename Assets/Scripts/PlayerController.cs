@@ -61,13 +61,9 @@ public class PlayerController : MonoBehaviour
 
     public float textWriteDelay;
 
-    public Image healthBar;
-
     public Image dashStackLoadingCounter;
 
     public Text dashNumberText;
-
-    public GameObject pauseMenu;
 
     public GameObject visorUI;
 
@@ -76,10 +72,6 @@ public class PlayerController : MonoBehaviour
     public GameObject speedStackBackground;
 
     public Text speedStackText;
-
-    public GameObject damageEffect;
-
-    public GameObject interactText;
 
     public Text dialogText;
 
@@ -165,12 +157,46 @@ public class PlayerController : MonoBehaviour
 
     private RaycastHit hit;
 
+    //Screen that appears when damage is taken
+    private GameObject damageEffect;
+
+    //Pause menu
+    private GameObject pauseMenu;
+
+    //Health bar foreground to be depleted when damage is taken
+    private Image healthBar;
+
+    //Text component that will display interaction information
+    public GameObject interactText;
+
+    //Text element in which the dialog will be introduced
+    //private Text dialogText;
+
+    //Current instance of the text coroutine. Null if it is not in progress.
+    private IEnumerator introduceTextCoroutineInstance;
+
+    //Current text being introduced into the dialogText. Is an empty string at the same time the coroutine doing it is null.
+    private string textBeingIntroduced;
+
+    private AudioSource dialogSoundBeingReproduced;
+
+    //If set to true, the player will be able to look around. 
+    private bool canLookAround;
+
+    //Is the movement enabled for the player?
+    private bool movementEnabled;
+
+    //Is the camera movement enabled for the player?
+    private bool cameraMovementEnabled;
+
     //--------------------------------------------------------------------------------------------------------------
     //Functions
     //--------------------------------------------------------------------------------------------------------------
 
     void Start()
     {
+        movementEnabled = true;
+        cameraMovementEnabled = true;
         maxHealthPoints = healthPoints;
         baseForwardDashForce = forwardDashForce;
         baseLateralDashForce = lateralDashForce;
@@ -185,6 +211,9 @@ public class PlayerController : MonoBehaviour
         camera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
         crosshairSuccess = GameObject.Find("Crosshair_Success").GetComponent<Image>();
         crosshairFail = GameObject.Find("Crosshair_Fail").GetComponent<Image>();
+        damageEffect = GameObject.Find("DamageEffect");
+        pauseMenu = GameObject.Find("PauseMenu");
+        healthBar = GameObject.Find("HealthBar_Foreground").GetComponent<Image>();
         attackFail = GameObject.FindGameObjectWithTag("Player").GetComponents<AudioSource>()[0];
         attackSuccess = GameObject.FindGameObjectWithTag("Player").GetComponents<AudioSource>()[1];
         deathSound = GameObject.FindGameObjectWithTag("Player").GetComponents<AudioSource>()[2];
@@ -192,16 +221,6 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if(dialogText.text == "")
-        {
-        //So the player is able to rotate relative to the y axis with the camera. This is setup this way so its local axis is synchronized
-        //with what the player sees
-        transform.localEulerAngles = new Vector3(0, yRot, 0);
-
-        //So only the camera rotates relative to the x axis, not the player
-        camera.transform.localEulerAngles = new Vector3(xRot, 0, 0);
-        }
-
         //Only able to do this is 
         if (!isPaused && !isDead)
         {
@@ -210,8 +229,7 @@ public class PlayerController : MonoBehaviour
 
             Physics.Raycast(ray.origin, ray.direction, out hit);
 
-            canInteract = true;
-            if (canInteract)
+            if (canInteract && dialogText.text == "")
             {
                 if (hit.collider != null && hit.collider.tag == "Interactive" && hit.distance < interactionRange)
                 {
@@ -222,6 +240,11 @@ public class PlayerController : MonoBehaviour
                         hit.collider.gameObject.SendMessage("DoAction");
                     }
                 }
+
+                else
+                {
+                    CleanInteractionText();
+                }
             }
 
             else
@@ -229,19 +252,37 @@ public class PlayerController : MonoBehaviour
                 CleanInteractionText();
             }
 
-            //Moves the player
-            Vector3 mov = new Vector3(Input.GetAxis("Horizontal") * speed * Time.deltaTime, 0,
-                                Input.GetAxis("Vertical") * speed * Time.deltaTime);
+        }
 
-            transform.Translate(mov);
+        if (dialogText.text == "")
+        {
 
-            //Because vertical camera rotation is relative to the in-game x axis
-            xRot += Input.GetAxis("Mouse Y") * sensitivity * -1;
 
-            //Because horizontal camera rotation is relative to the in-game y axis
-            yRot += Input.GetAxis("Mouse X") * sensitivity;
+            if (movementEnabled)
+            {
+                //Moves the player
+                transform.Translate(new Vector3(Input.GetAxis("Horizontal") * speed * Time.deltaTime, 0,
+                                    Input.GetAxis("Vertical") * speed * Time.deltaTime));
+            }
 
-            xRot = Mathf.Clamp(xRot, -55, 35);
+            if (cameraMovementEnabled)
+            {
+                //So the player is able to rotate relative to the y axis with the camera. This is setup this way so its local axis is synchronized
+                //with what the player sees
+                transform.localEulerAngles = new Vector3(0, yRot, 0);
+
+                //So only the camera rotates relative to the x axis, not the player
+                camera.transform.localEulerAngles = new Vector3(xRot, 0, 0);
+
+                //Because vertical camera rotation is relative to the in-game x axis
+                xRot += Input.GetAxis("Mouse Y") * sensitivity * -1;
+
+                //Because horizontal camera rotation is relative to the in-game y axis
+                yRot += Input.GetAxis("Mouse X") * sensitivity;
+
+                xRot = Mathf.Clamp(xRot, -55, 35);
+            }
+
             //Receive input for attack
             if (Input.GetMouseButton(0))
             {
@@ -268,6 +309,22 @@ public class PlayerController : MonoBehaviour
                 StartCoroutine(ActivateEnergyVission());
             }
         }
+
+        else if (introduceTextCoroutineInstance != null)
+        {
+            //If F is pressed when talking to someone
+            if (Input.GetKeyDown(KeyCode.F))
+            {
+                SkipText();
+            }
+        }
+
+        else if (Input.GetKeyDown(KeyCode.F))
+        {
+            ClearText();
+        }
+
+
 
         //Get input for pause
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -588,23 +645,55 @@ public class PlayerController : MonoBehaviour
         GameObject.Find("MenuController").SendMessage("UpdateSensitivityText", sensitivity.ToString());
     }
 
-    void EnableInteractivity()
+    public void SetInteractivity(bool newValue)
     {
-        canInteract = true;
+        canInteract = newValue;
     }
 
-    void DisableInteractivity()
+    public void SetMovementEnabled(bool newValue)
     {
-        canInteract = false;
+        movementEnabled = newValue;
+    }
+
+    public void SetCameraMovementEnabled(bool newValue)
+    {
+        cameraMovementEnabled = newValue;
     }
 
     public IEnumerator IntroduceText(string textToIntroduce, AudioSource writingSoundEffect, int numberOfPlays)
     {
-        yield return StartCoroutine(PlayerUtils.IntroduceText(textToIntroduce, dialogText, textWriteDelay, writingSoundEffect, numberOfPlays));
+        yield return new WaitForSeconds(0.01f);
+        textBeingIntroduced = textToIntroduce;
+        canInteract = false;
+        introduceTextCoroutineInstance = PlayerUtils.IntroduceText(textToIntroduce, dialogText, textWriteDelay, writingSoundEffect, numberOfPlays);
+        yield return StartCoroutine(introduceTextCoroutineInstance);
+        introduceTextCoroutineInstance = null;
     }
 
-    void clearText()
+    public IEnumerator IntroduceNewText(string textToIntroduce, AudioSource writingSoundEffect, int numberOfPlays)
+    {
+        //Waiting time added because when it is not there, sometimes dialog would just appear as if textWriteDelay was 0
+        yield return new WaitForSeconds(0.01f);
+        ClearText();
+        canInteract = false;
+        textBeingIntroduced = textToIntroduce;
+        introduceTextCoroutineInstance = PlayerUtils.IntroduceText(textToIntroduce, dialogText, textWriteDelay, writingSoundEffect, numberOfPlays);
+        yield return StartCoroutine(introduceTextCoroutineInstance);
+        introduceTextCoroutineInstance = null;
+    }
+
+    void ClearText()
     {
         dialogText.text = "";
+        canInteract = true;
+    }
+
+    void SkipText()
+    {
+        StopCoroutine(introduceTextCoroutineInstance);
+        canInteract = false;
+        introduceTextCoroutineInstance = null;
+        dialogText.text = textBeingIntroduced;
+        textBeingIntroduced = "";
     }
 }

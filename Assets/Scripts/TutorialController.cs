@@ -31,14 +31,22 @@ public class TutorialController : Interactive
     //Should Baroth leave the room?
     private bool leave;
 
+    //What Baroth should be saying
+    private string currentLine;
+
+    //Sounds when 'talking'
+    private AudioSource writingSoundEffect;
+
     //--------------------------------------------------------------------------------------------------------------
     //Functions
     //--------------------------------------------------------------------------------------------------------------
 
     void Start()
     {
+        currentEvent = 0;
         shouldMove = false;
         StartCoroutine(ManageEvents());
+        writingSoundEffect = GameObject.Find("Baroth").GetComponent<AudioSource>();
     }
 
     void Update()
@@ -55,17 +63,29 @@ public class TutorialController : Interactive
 
     IEnumerator ManageEvents()
     {
-        Debug.Log("started ManageEvents");
-        yield return new WaitForSeconds(2);
         if (currentEvent == 0)
         {
-           yield return GameObject.Find("Player").GetComponent<PlayerController>().IntroduceText("test text test text test text",
-               GetComponent<AudioSource>(), 1);
+            SetPlayerMovement(false);
+            yield return new WaitForSeconds(1);
+            currentLine = "Hello, I'm Baroth";
+            yield return StartCoroutine(Talk());
+            yield return new WaitForSeconds(1);
+            currentLine = "(Something about the fact that you can't see)";
+            yield return StartCoroutine(Talk());
+            roomLight.SetActive(true);
+            GameObject.Find("Player").GetComponent<PlayerController>().SetCameraMovementEnabled(true);
+            GameObject.Find("Player").GetComponent<PlayerController>().SetMovementEnabled(true);
+            currentEvent++;
+
+            yield break;
         }
 
         if (currentEvent == 1)
         {
-
+            GameObject.Find("Player").GetComponent<PlayerController>().SetMovementEnabled(true);
+            currentLine = "Now let's get out of here";
+            yield return StartCoroutine(Talk());
+            shouldMove = true;
         }
 
         if (currentEvent == 2)
@@ -79,19 +99,31 @@ public class TutorialController : Interactive
         }
     }
 
+    //Enables or disables player movement according to the parameter
+    void SetPlayerMovement(bool enabled)
+    {
+        GameObject.Find("Player").GetComponent<PlayerController>().SetMovementEnabled(enabled);
+        GameObject.Find("Player").GetComponent<PlayerController>().SetCameraMovementEnabled(enabled);
+    }
+
+    IEnumerator Talk()
+    {
+        yield return StartCoroutine(GameObject.Find("Player").GetComponent<PlayerController>().IntroduceNewText(currentLine, writingSoundEffect, 1));
+    }
+
     void LeaveRoom()
     {
         GameObject.Find("Door").GetComponent<AudioSource>().Play();
         Destroy(gameObject, GameObject.Find("Door").GetComponent<AudioSource>().clip.length);
-
+       
         //Allows the player to interact with the door
-        GameObject.Find("Player").SendMessage("EnableInteractivity");
+        GameObject.Find("Player").GetComponent<PlayerController>().SetInteractivity(true);
     }
 
     //Should be moved to Player Controller later
 
     public override void DoAction()
     {
-        throw new NotImplementedException();
+        StartCoroutine(ManageEvents());
     }
 }
