@@ -13,7 +13,7 @@ public class TutorialController : Interactive
 
     public GameObject roomLight;
 
-    public float textWriteDelay;
+    public float characterWriteDelay;
 
     //--------------------------------------------------------------------------------------------------------------
     //Variables
@@ -37,12 +37,19 @@ public class TutorialController : Interactive
     //Sounds when 'talking'
     private AudioSource writingSoundEffect;
 
+    private bool talkingToPlayer;
+
+    private ArrayList dialog;
+
+    private int currentDialogIndex;
+
     //--------------------------------------------------------------------------------------------------------------
     //Functions
     //--------------------------------------------------------------------------------------------------------------
 
     void Start()
     {
+        dialog = new ArrayList();
         currentEvent = 0;
         shouldMove = false;
         StartCoroutine(ManageEvents());
@@ -61,41 +68,48 @@ public class TutorialController : Interactive
         }
     }
 
+    void initializeDialogList()
+    {
+        dialog.Add("Hello, I'm Baroth");
+        dialog.Add("You can't see, huh? Let's fix that");
+        dialog.Add("");
+    }
+
     IEnumerator ManageEvents()
     {
         if (currentEvent == 0)
         {
+            //So the player can't interact with it at first
+            gameObject.tag = "Untagged";
             SetPlayerMovement(false);
             yield return new WaitForSeconds(1);
+
+            //Starts talking, then leave it to the player to continue
             currentLine = "Hello, I'm Baroth";
             yield return StartCoroutine(Talk());
-            yield return new WaitForSeconds(1);
-            currentLine = "(Something about the fact that you can't see)";
-            yield return StartCoroutine(Talk());
-            roomLight.SetActive(true);
-            GameObject.Find("Player").GetComponent<PlayerController>().SetCameraMovementEnabled(true);
-            GameObject.Find("Player").GetComponent<PlayerController>().SetMovementEnabled(true);
-            currentEvent++;
-
             yield break;
         }
 
         if (currentEvent == 1)
         {
-            GameObject.Find("Player").GetComponent<PlayerController>().SetMovementEnabled(true);
-            currentLine = "Now let's get out of here";
-            yield return StartCoroutine(Talk());
-            shouldMove = true;
+            roomLight.SetActive(true);
+            gameObject.tag = "Interactive";
+            GameObject.Find("Player").GetComponent<PlayerController>().SetCameraMovementEnabled(true);
+
+            //So the player can interact with it from now on
+            currentEvent++;
+            yield break;
         }
 
         if (currentEvent == 2)
         {
-
         }
 
         if (currentEvent == 3)
         {
-
+            GameObject.Find("Player").GetComponent<PlayerController>().SetMovementEnabled(true);
+            shouldMove = true;
+            currentEvent++;
         }
     }
 
@@ -108,7 +122,14 @@ public class TutorialController : Interactive
 
     IEnumerator Talk()
     {
-        yield return StartCoroutine(GameObject.Find("Player").GetComponent<PlayerController>().IntroduceNewText(currentLine, writingSoundEffect, 1));
+        talkingToPlayer = true;
+        yield return StartCoroutine(GameObject.Find("Player").GetComponent<PlayerController>().IntroduceNewText(currentLine, writingSoundEffect, characterWriteDelay, 1000, gameObject));
+    }
+
+    void FinishConversation()
+    {
+        talkingToPlayer = false;
+        GameObject.Find("Player").GetComponent<PlayerController>().SendMessage("FinishConversation");
     }
 
     void LeaveRoom()
@@ -124,6 +145,51 @@ public class TutorialController : Interactive
 
     public override void DoAction()
     {
-        StartCoroutine(ManageEvents());
+        ContinueConversation();
+    }
+
+    void ContinueConversation()
+    {
+        //Debug.Log("continued conversation with currentEvent: " + currentEvent);
+        if(currentEvent == 0)
+        {
+            currentLine = "(Something about the fact that you can't see)";
+            currentEvent++;
+        }
+        //Debug.Log("currentLine after if: " + currentLine);
+
+        else if(currentEvent == 1)
+        {
+            currentLine = "";
+            StartCoroutine(ManageEvents());
+        }
+
+        else if(currentEvent == 2)
+        {
+            currentLine = "Let's get outta here";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 3)
+        {
+            currentLine = "";
+            StartCoroutine(ManageEvents());
+        }
+
+        else if (currentEvent == 4)
+        {
+
+        }
+
+        //Debug.Log("currentLine: " + currentLine);
+        if (currentLine == "")
+        {
+            FinishConversation();
+        }
+
+        else if (currentLine != "")
+        {
+            StartCoroutine(Talk());
+        }
     }
 }

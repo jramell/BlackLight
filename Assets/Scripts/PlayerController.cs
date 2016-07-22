@@ -59,8 +59,6 @@ public class PlayerController : MonoBehaviour
 
     public float interactionRange;
 
-    public float textWriteDelay;
-
     public Image dashStackLoadingCounter;
 
     public Text dashNumberText;
@@ -175,9 +173,6 @@ public class PlayerController : MonoBehaviour
     //Current instance of the text coroutine. Null if it is not in progress.
     private IEnumerator introduceTextCoroutineInstance;
 
-    //Current text being introduced into the dialogText. Is an empty string at the same time the coroutine doing it is null.
-    private string textBeingIntroduced;
-
     private AudioSource dialogSoundBeingReproduced;
 
     //If set to true, the player will be able to look around. 
@@ -186,8 +181,14 @@ public class PlayerController : MonoBehaviour
     //Is the movement enabled for the player?
     private bool movementEnabled;
 
+    private GameObject objectTalkingTo;
+
     //Is the camera movement enabled for the player?
     private bool cameraMovementEnabled;
+
+    private bool introducingText;
+
+    private bool shouldSkipText;
 
     //--------------------------------------------------------------------------------------------------------------
     //Functions
@@ -195,6 +196,9 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
+        canInteract = true;
+        objectTalkingTo = null;
+        introducingText = false;
         movementEnabled = true;
         cameraMovementEnabled = true;
         maxHealthPoints = healthPoints;
@@ -254,10 +258,9 @@ public class PlayerController : MonoBehaviour
 
         }
 
+        //If talking to someone, cannot move
         if (dialogText.text == "")
         {
-
-
             if (movementEnabled)
             {
                 //Moves the player
@@ -310,18 +313,19 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        else if (introduceTextCoroutineInstance != null)
+        else if (introducingText && Input.GetKey(KeyCode.F))
         {
-            //If F is pressed when talking to someone
+            //if F is pressed when talking to someone
             if (Input.GetKeyDown(KeyCode.F))
             {
-                SkipText();
+                shouldSkipText = true;
             }
         }
 
+        //A conversation is active in a conversation, so it must continue when the player presses F
         else if (Input.GetKeyDown(KeyCode.F))
         {
-            ClearText();
+            ContinueConversation();
         }
 
 
@@ -663,37 +667,63 @@ public class PlayerController : MonoBehaviour
     public IEnumerator IntroduceText(string textToIntroduce, AudioSource writingSoundEffect, int numberOfPlays)
     {
         yield return new WaitForSeconds(0.01f);
-        textBeingIntroduced = textToIntroduce;
-        canInteract = false;
-        introduceTextCoroutineInstance = PlayerUtils.IntroduceText(textToIntroduce, dialogText, textWriteDelay, writingSoundEffect, numberOfPlays);
-        yield return StartCoroutine(introduceTextCoroutineInstance);
-        introduceTextCoroutineInstance = null;
+        //textBeingIntroduced = textToIntroduce;
+        //canInteract = false;
+        //introduceTextCoroutineInstance = PlayerUtils.IntroduceText(textToIntroduce, dialogText, textWriteDelay, writingSoundEffect, numberOfPlays);
+        //yield return StartCoroutine(introduceTextCoroutineInstance);
+        //introduceTextCoroutineInstance = null;
     }
 
-    public IEnumerator IntroduceNewText(string textToIntroduce, AudioSource writingSoundEffect, int numberOfPlays)
+    public IEnumerator IntroduceNewText(string textToIntroduce, AudioSource writingSoundEffect, float characterWriteDelay, float timeBetweenPlays, GameObject talkingWith)
     {
         //Waiting time added because when it is not there, sometimes dialog would just appear as if textWriteDelay was 0
         yield return new WaitForSeconds(0.01f);
+        objectTalkingTo = talkingWith;
+        introducingText = true;
         ClearText();
-        canInteract = false;
-        textBeingIntroduced = textToIntroduce;
-        introduceTextCoroutineInstance = PlayerUtils.IntroduceText(textToIntroduce, dialogText, textWriteDelay, writingSoundEffect, numberOfPlays);
-        yield return StartCoroutine(introduceTextCoroutineInstance);
-        introduceTextCoroutineInstance = null;
+        char[] textInChar = textToIntroduce.ToCharArray();
+        float counterForPlaying = 0.0f;
+        bool shouldPlay = writingSoundEffect != null;
+
+        for (int i = 0; i < textInChar.Length; i++)
+        {
+            if (shouldSkipText)
+            {
+                dialogText.text = textToIntroduce;
+                shouldSkipText = false;
+                break;
+            }
+
+            if (shouldPlay)
+            {
+                writingSoundEffect.Play();
+                counterForPlaying = 0.0f;
+            }
+
+            else
+            {
+                counterForPlaying += characterWriteDelay;
+            }
+            shouldPlay = counterForPlaying > timeBetweenPlays;
+            dialogText.text += textInChar[i];
+            yield return new WaitForSeconds(characterWriteDelay);
+        }
+        introducingText = false;
+    }
+
+    void ContinueConversation()
+    {
+        objectTalkingTo.SendMessage("ContinueConversation");
     }
 
     void ClearText()
     {
         dialogText.text = "";
-        canInteract = true;
     }
 
-    void SkipText()
+    void FinishConversation()
     {
-        StopCoroutine(introduceTextCoroutineInstance);
-        canInteract = false;
-        introduceTextCoroutineInstance = null;
-        dialogText.text = textBeingIntroduced;
-        textBeingIntroduced = "";
+        dialogText.text = "";
+        objectTalkingTo = null;
     }
 }
