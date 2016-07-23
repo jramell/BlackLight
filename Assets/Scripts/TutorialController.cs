@@ -15,6 +15,8 @@ public class TutorialController : Interactive
 
     public float characterWriteDelay;
 
+    public GameObject healthBar;
+
     //--------------------------------------------------------------------------------------------------------------
     //Variables
     //--------------------------------------------------------------------------------------------------------------
@@ -49,8 +51,9 @@ public class TutorialController : Interactive
 
     void Start()
     {
+        Debug.Log("currentEvent: " + currentEvent);
         dialog = new ArrayList();
-        currentEvent = 0;
+        //currentEvent = 0;
         shouldMove = false;
         StartCoroutine(ManageEvents());
         writingSoundEffect = GameObject.Find("Baroth").GetComponent<AudioSource>();
@@ -60,20 +63,26 @@ public class TutorialController : Interactive
     {
         if (shouldMove)
         {
+            gameObject.tag = "Untagged";
             transform.position = NPCUtils.MoveTo(transform.position, frontOfDoor.position, speed);
             if (transform.position == frontOfDoor.position)
             {
                 LeaveRoom();
             }
         }
+
+        else if (currentEvent > 4)
+        {
+            gameObject.tag = "Interactive";
+        }
     }
 
-    void initializeDialogList()
-    {
-        dialog.Add("Hello, I'm Baroth");
-        dialog.Add("You can't see, huh? Let's fix that");
-        dialog.Add("");
-    }
+    //void initializeDialogList()
+    //{
+    //    dialog.Add("Hello, I'm Baroth");
+    //    dialog.Add("You can't see, huh? Let's fix that");
+    //    dialog.Add("");
+    //}
 
     IEnumerator ManageEvents()
     {
@@ -85,7 +94,7 @@ public class TutorialController : Interactive
             yield return new WaitForSeconds(1);
 
             //Starts talking, then leave it to the player to continue
-            currentLine = "Hello, I'm Baroth";
+            currentLine = "Wow, hello. This is a demo, and the dialog is not planned yet";
             yield return StartCoroutine(Talk());
             yield break;
         }
@@ -103,6 +112,7 @@ public class TutorialController : Interactive
 
         if (currentEvent == 2)
         {
+
         }
 
         if (currentEvent == 3)
@@ -110,6 +120,12 @@ public class TutorialController : Interactive
             GameObject.Find("Player").GetComponent<PlayerController>().SetMovementEnabled(true);
             shouldMove = true;
             currentEvent++;
+            yield break;
+        }
+
+        if (currentEvent == 5)
+        {
+            healthBar.SetActive(true);
         }
     }
 
@@ -135,10 +151,10 @@ public class TutorialController : Interactive
     void LeaveRoom()
     {
         GameObject.Find("Door").GetComponent<AudioSource>().Play();
-        Destroy(gameObject, GameObject.Find("Door").GetComponent<AudioSource>().clip.length);
-       
-        //Allows the player to interact with the door
         GameObject.Find("Player").GetComponent<PlayerController>().SetInteractivity(true);
+        shouldMove = false;
+        Destroy(gameObject, GameObject.Find("Door").GetComponent<AudioSource>().clip.length);
+        //Allows the player to interact with the door
     }
 
     //Should be moved to Player Controller later
@@ -151,20 +167,20 @@ public class TutorialController : Interactive
     void ContinueConversation()
     {
         //Debug.Log("continued conversation with currentEvent: " + currentEvent);
-        if(currentEvent == 0)
+        if (currentEvent == 0)
         {
             currentLine = "(Something about the fact that you can't see)";
             currentEvent++;
         }
         //Debug.Log("currentLine after if: " + currentLine);
 
-        else if(currentEvent == 1)
+        else if (currentEvent == 1)
         {
             currentLine = "";
             StartCoroutine(ManageEvents());
         }
 
-        else if(currentEvent == 2)
+        else if (currentEvent == 2)
         {
             currentLine = "Let's get outta here";
             currentEvent++;
@@ -178,7 +194,14 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 4)
         {
+            currentLine = "You're numb, huh? Don't worry. Here's something for you to track your own health";
+            currentEvent++;
+        }
 
+        else if ( currentEvent == 5)
+        {
+            currentLine = "";
+            StartCoroutine(ManageEvents());
         }
 
         //Debug.Log("currentLine: " + currentLine);

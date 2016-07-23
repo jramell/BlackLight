@@ -196,6 +196,8 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
+        xRot = transform.rotation.eulerAngles.x;
+        yRot = transform.rotation.eulerAngles.y;
         canInteract = true;
         objectTalkingTo = null;
         introducingText = false;
