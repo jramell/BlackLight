@@ -4,6 +4,9 @@ using System.Collections;
 
 public class PlayerUtils : MonoBehaviour
 {
+    public static Color normalTutorialColor = new Color(242f/255f, 183f/255f, 94f/255f, 255f/255f);
+
+    public static Color warningColor = new Color(244f/255f, 94f/255f, 97f/255f, 1);
 
     /// <summary>
     /// Adds in order to the dialogText every character passed as a parameter with 'textWriteDelay' seconds between each

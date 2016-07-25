@@ -59,6 +59,12 @@ public class PlayerController : MonoBehaviour
 
     public float interactionRange;
 
+    //Health bar foreground to be depleted when damage is taken
+    public Image healthBar;
+
+    //Screen that appears when damage is taken
+    public GameObject damageEffect;
+
     public Image dashStackLoadingCounter;
 
     public Text dashNumberText;
@@ -72,6 +78,8 @@ public class PlayerController : MonoBehaviour
     public Text speedStackText;
 
     public Text dialogText;
+
+    public Text tutorialText;
 
     //--------------------------------------------------------------------------------------------------------------
     //Private variables
@@ -155,14 +163,12 @@ public class PlayerController : MonoBehaviour
 
     private RaycastHit hit;
 
-    //Screen that appears when damage is taken
-    private GameObject damageEffect;
+
 
     //Pause menu
     private GameObject pauseMenu;
 
-    //Health bar foreground to be depleted when damage is taken
-    private Image healthBar;
+
 
     //Text component that will display interaction information
     public GameObject interactText;
@@ -214,136 +220,138 @@ public class PlayerController : MonoBehaviour
         isChargingStacks = false;
         isDead = false;
         rigidbody = GetComponent<Rigidbody>();
+        attackFail = GetComponents<AudioSource>()[0];
+        attackSuccess = GetComponents<AudioSource>()[1];
+        deathSound = GetComponents<AudioSource>()[2];
         camera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
         crosshairSuccess = GameObject.Find("Crosshair_Success").GetComponent<Image>();
         crosshairFail = GameObject.Find("Crosshair_Fail").GetComponent<Image>();
-        damageEffect = GameObject.Find("DamageEffect");
         pauseMenu = GameObject.Find("PauseMenu");
-        healthBar = GameObject.Find("HealthBar_Foreground").GetComponent<Image>();
-        attackFail = GameObject.FindGameObjectWithTag("Player").GetComponents<AudioSource>()[0];
-        attackSuccess = GameObject.FindGameObjectWithTag("Player").GetComponents<AudioSource>()[1];
-        deathSound = GameObject.FindGameObjectWithTag("Player").GetComponents<AudioSource>()[2];
     }
 
     void Update()
     {
+        //attackFail = GameObject.FindGameObjectWithTag("Player").GetComponents<AudioSource>()[0];
+        //attackSuccess = GameObject.FindGameObjectWithTag("Player").GetComponents<AudioSource>()[1];
+        //deathSound = GameObject.FindGameObjectWithTag("Player").GetComponents<AudioSource>()[2];
+
         //Only able to do this is 
         if (!isPaused && !isDead)
         {
-            //Updates the ray casted onto the screen for various purposes
-            ray = new Ray(camera.transform.position, camera.transform.forward * attackRange);
 
-            Physics.Raycast(ray.origin, ray.direction, out hit);
-
-            if (canInteract && dialogText.text == "")
+            //If talking to someone, cannot move, move the camera, or do anything related to casting rays
+            if (dialogText.text == "")
             {
-                if (hit.collider != null && hit.collider.tag == "Interactive" && hit.distance < interactionRange)
-                {
-                    hit.collider.gameObject.SendMessage("UpdateInteractionText");
+                //Updates the ray casted onto the screen for various purposes
+                ray = new Ray(camera.transform.position, camera.transform.forward * attackRange);
 
-                    if (Input.GetKeyDown(KeyCode.F))
+                Physics.Raycast(ray.origin, ray.direction, out hit);
+
+                if (movementEnabled)
+                {
+                    //Moves the player
+                    transform.Translate(new Vector3(Input.GetAxis("Horizontal") * speed * Time.deltaTime, 0,
+                                        Input.GetAxis("Vertical") * speed * Time.deltaTime));
+                }
+
+                if (cameraMovementEnabled)
+                {
+                    //So the player is able to rotate relative to the y axis with the camera. This is setup this way so its local axis is synchronized
+                    //with what the player sees
+                    transform.localEulerAngles = new Vector3(0, yRot, 0);
+
+                    //So only the camera rotates relative to the x axis, not the player
+                    camera.transform.localEulerAngles = new Vector3(xRot, 0, 0);
+
+                    //Because vertical camera rotation is relative to the in-game x axis
+                    xRot += Input.GetAxis("Mouse Y") * sensitivity * -1;
+
+                    //Because horizontal camera rotation is relative to the in-game y axis
+                    yRot += Input.GetAxis("Mouse X") * sensitivity;
+
+                    xRot = Mathf.Clamp(xRot, -55, 35);
+                }
+
+                if (canInteract)
+                {
+                    if (hit.collider != null && hit.collider.tag == "Interactive" && hit.distance < interactionRange)
                     {
-                        hit.collider.gameObject.SendMessage("DoAction");
+                        hit.collider.gameObject.SendMessage("UpdateInteractionText");
+
+                        if (Input.GetKeyDown(KeyCode.F))
+                        {
+                            hit.collider.gameObject.SendMessage("DoAction");
+                        }
+                    }
+
+                    else if (interactText.GetComponent<Text>().text != "")
+                    {
+                        CleanInteractionText();
                     }
                 }
 
-                else
+
+
+                //Receive input for attack
+                if (Input.GetMouseButton(0))
                 {
-                    CleanInteractionText();
+                    StartCoroutine(Attack());
+                }
+
+                //Receive input for jump
+                if (Input.GetKey(KeyCode.Space))
+                {
+                    Jump();
+                }
+
+                //Receive input for dash
+                Dash();
+
+                //Charge dash
+                if (CanChargeStacks() && !isChargingStacks)
+                {
+                    StartCoroutine(ChargeStacks());
+                }
+
+                if (Input.GetKeyDown(KeyCode.X))
+                {
+                    StartCoroutine(ActivateEnergyVission());
                 }
             }
 
-            else
+            else if (introducingText && Input.GetKey(KeyCode.F))
+            {
+                //if F is pressed when talking to someone
+                if (Input.GetKeyDown(KeyCode.F))
+                {
+                    shouldSkipText = true;
+                }
+            }
+
+            //A conversation is active in a conversation, so it must continue when the player presses F
+            else if (Input.GetKeyDown(KeyCode.F))
+            {
+                ContinueConversation();
+            }
+
+            if (dialogText.text != "")
             {
                 CleanInteractionText();
             }
 
-        }
-
-        //If talking to someone, cannot move
-        if (dialogText.text == "")
-        {
-            if (movementEnabled)
+            //Get input for pause
+            if (Input.GetKeyDown(KeyCode.Escape))
             {
-                //Moves the player
-                transform.Translate(new Vector3(Input.GetAxis("Horizontal") * speed * Time.deltaTime, 0,
-                                    Input.GetAxis("Vertical") * speed * Time.deltaTime));
+                Pause();
             }
 
-            if (cameraMovementEnabled)
+            //Receive input for retry
+            if (isDead)
             {
-                //So the player is able to rotate relative to the y axis with the camera. This is setup this way so its local axis is synchronized
-                //with what the player sees
-                transform.localEulerAngles = new Vector3(0, yRot, 0);
-
-                //So only the camera rotates relative to the x axis, not the player
-                camera.transform.localEulerAngles = new Vector3(xRot, 0, 0);
-
-                //Because vertical camera rotation is relative to the in-game x axis
-                xRot += Input.GetAxis("Mouse Y") * sensitivity * -1;
-
-                //Because horizontal camera rotation is relative to the in-game y axis
-                yRot += Input.GetAxis("Mouse X") * sensitivity;
-
-                xRot = Mathf.Clamp(xRot, -55, 35);
-            }
-
-            //Receive input for attack
-            if (Input.GetMouseButton(0))
-            {
-                StartCoroutine(Attack());
-            }
-
-            //Receive input for jump
-            if (Input.GetKey(KeyCode.Space))
-            {
-                Jump();
-            }
-
-            //Receive input for dash
-            Dash();
-
-            //Charge dash
-            if (CanChargeStacks() && !isChargingStacks)
-            {
-                StartCoroutine(ChargeStacks());
-            }
-
-            if (Input.GetKeyDown(KeyCode.X))
-            {
-                StartCoroutine(ActivateEnergyVission());
-            }
-        }
-
-        else if (introducingText && Input.GetKey(KeyCode.F))
-        {
-            //if F is pressed when talking to someone
-            if (Input.GetKeyDown(KeyCode.F))
-            {
-                shouldSkipText = true;
-            }
-        }
-
-        //A conversation is active in a conversation, so it must continue when the player presses F
-        else if (Input.GetKeyDown(KeyCode.F))
-        {
-            ContinueConversation();
-        }
-
-
-
-        //Get input for pause
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            Pause();
-        }
-
-        //Receive input for retry
-        if (isDead)
-        {
-            if (Input.GetKeyDown(KeyCode.R))
-            {
-                Retry();
+                if (Input.GetKeyDown(KeyCode.R))
+                {
+                    Retry();
+                }
             }
         }
     }
@@ -498,7 +506,20 @@ public class PlayerController : MonoBehaviour
 
     void Retry()
     {
-        SceneManager.LoadScene("Test");
+        GameObject.Find("img_GameOverScreen").GetComponent<Image>().enabled = false;
+        GameObject.Find("txt_GameOverText").GetComponent<Text>().enabled = false;
+        GameObject.Find("txt_RetryText").GetComponent<Text>().enabled = false;
+        healthPoints = maxHealthPoints;
+
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+
+        for (int i = 0; i < enemies.Length; i++)
+        {
+            enemies[i].SetActive(false);
+        }
+
+        transform.position = GameObject.Find("Respawn").transform.position;
+        GameObject.Find("Baroth").GetComponent<TutorialController>().Retry();
     }
 
     void Dash()
@@ -590,6 +611,11 @@ public class PlayerController : MonoBehaviour
 
         losingSpeedStacks = false;
         modifySpeedStacks(-1);
+    }
+
+    public void ReplenishHealth()
+    {
+        healthPoints = maxHealthPoints;
     }
 
     //Will sum the parameter to the current speed stacks
@@ -699,7 +725,6 @@ public class PlayerController : MonoBehaviour
             if (shouldPlay)
             {
                 writingSoundEffect.Play();
-                counterForPlaying = 0.0f;
             }
 
             else
@@ -727,5 +752,22 @@ public class PlayerController : MonoBehaviour
     {
         dialogText.text = "";
         objectTalkingTo = null;
+    }
+
+    public void SetTutorialText(string newText)
+    {
+        tutorialText.GetComponent<Text>().text = newText;
+    }
+
+    public void DisplayWarning(string warning)
+    {
+        tutorialText.color = PlayerUtils.warningColor;
+        tutorialText.text = "<size=20>!</size>   " +warning;
+    }
+
+    public void DisplayTip(string tip)
+    {
+        tutorialText.color = PlayerUtils.normalTutorialColor;
+        tutorialText.text = tip;
     }
 }

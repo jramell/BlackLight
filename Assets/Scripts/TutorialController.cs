@@ -17,6 +17,12 @@ public class TutorialController : Interactive
 
     public GameObject healthBar;
 
+    //Dummy to defeat
+    public GameObject dummy;
+
+    //First enemy to defeat
+    public GameObject firstEnemy;
+
     //--------------------------------------------------------------------------------------------------------------
     //Variables
     //--------------------------------------------------------------------------------------------------------------
@@ -26,6 +32,11 @@ public class TutorialController : Interactive
     //Event 1: secondDialog plays. Baroth leaves the room
     //Event 2: The player is now outside. Baroth explains health bar.
     private static int currentEvent;
+
+    private static int lastCheckpoint;
+
+    //Has the dummy been spawned?
+    private bool dummySpawned;
 
     //Should Baroth be moving?
     private bool shouldMove;
@@ -41,8 +52,6 @@ public class TutorialController : Interactive
 
     private bool talkingToPlayer;
 
-    private ArrayList dialog;
-
     private int currentDialogIndex;
 
     //--------------------------------------------------------------------------------------------------------------
@@ -52,7 +61,6 @@ public class TutorialController : Interactive
     void Start()
     {
         Debug.Log("currentEvent: " + currentEvent);
-        dialog = new ArrayList();
         //currentEvent = 0;
         shouldMove = false;
         StartCoroutine(ManageEvents());
@@ -95,6 +103,7 @@ public class TutorialController : Interactive
 
             //Starts talking, then leave it to the player to continue
             currentLine = "Wow, hello. This is a demo, and the dialog is not planned yet";
+            //GameObject.Find("Player").GetComponent<PlayerController>().SetInteractivity(false);
             yield return StartCoroutine(Talk());
             yield break;
         }
@@ -104,7 +113,6 @@ public class TutorialController : Interactive
             roomLight.SetActive(true);
             gameObject.tag = "Interactive";
             GameObject.Find("Player").GetComponent<PlayerController>().SetCameraMovementEnabled(true);
-
             //So the player can interact with it from now on
             currentEvent++;
             yield break;
@@ -126,6 +134,8 @@ public class TutorialController : Interactive
         if (currentEvent == 5)
         {
             healthBar.SetActive(true);
+            currentEvent++;
+            yield break;
         }
     }
 
@@ -140,6 +150,16 @@ public class TutorialController : Interactive
     {
         talkingToPlayer = true;
         yield return StartCoroutine(GameObject.Find("Player").GetComponent<PlayerController>().IntroduceNewText(currentLine, writingSoundEffect, characterWriteDelay, 1000, gameObject));
+
+        if (currentEvent == 0)
+        {
+            GameObject.Find("Player").GetComponent<PlayerController>().SetTutorialText("Press F to continue");
+        } 
+
+        else if (currentEvent == 1)
+        {
+           
+        }
     }
 
     void FinishConversation()
@@ -169,6 +189,7 @@ public class TutorialController : Interactive
         //Debug.Log("continued conversation with currentEvent: " + currentEvent);
         if (currentEvent == 0)
         {
+            GameObject.Find("Player").GetComponent<PlayerController>().SetTutorialText("");
             currentLine = "(Something about the fact that you can't see)";
             currentEvent++;
         }
@@ -189,6 +210,7 @@ public class TutorialController : Interactive
         else if (currentEvent == 3)
         {
             currentLine = "";
+            GameObject.Find("Player").GetComponent<PlayerController>().SetTutorialText("Use 'WASD' to move");
             StartCoroutine(ManageEvents());
         }
 
@@ -198,13 +220,111 @@ public class TutorialController : Interactive
             currentEvent++;
         }
 
-        else if ( currentEvent == 5)
+        else if (currentEvent == 5)
         {
             currentLine = "";
             StartCoroutine(ManageEvents());
         }
 
-        //Debug.Log("currentLine: " + currentLine);
+        else if (currentEvent == 6)
+        {
+            currentLine = "There. Now, I'll teach you to fight so you're ready when the time comes";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 7)
+        {
+            currentLine = "In most fights in this world, your foe'll prolly have some form of ranged attack, and you prolly won't";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 8)
+        {
+            currentLine = "That's why you'll need to learn how to punch first. Go and punch that dummy 'till it disspears, then come back";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 9)
+        {
+            currentLine = "It can take a lot of hits, specially from a rookie like you, so don't feel bad if you take some time";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 10)
+        {
+            currentLine = "";
+            GameObject.Find("Player").GetComponent<PlayerController>().SetTutorialText("Press Left Click to attack");
+            if (!dummySpawned)
+            {
+                dummy.SetActive(true);
+            }
+            currentEvent++;
+        }
+
+        else if (currentEvent == 11)
+        {
+            currentLine = "It can take a lot of hits, specially from a rookie like you, so don't feel bad if it takes some time";
+            currentEvent = 10;
+        }
+
+        else if (currentEvent == 12)
+        {
+            currentLine = "Wow. That was fast.";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 13)
+        {
+            lastCheckpoint = currentEvent;
+            currentLine = "Okay, now some real combat experience. Defeat the guy that'll appear as soon as I'm done talking";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 14)
+        {
+            currentLine = "You'll know where he is 'cuz he'll start shooting energy thingies at ya";
+            GameObject.Find("Player").GetComponent<PlayerController>().DisplayWarning("Finishing this conversation will spawn an enemy");
+            currentEvent++;
+        }
+
+        else if (currentEvent == 15)
+        {
+            currentLine = "";
+            GameObject.Find("Player").GetComponent<PlayerController>().SetTutorialText("");
+            if (!firstEnemy.activeInHierarchy)
+            {
+                firstEnemy.SetActive(true);
+            }
+            firstEnemy.SetActive(true);
+            currentEvent++;
+        }
+
+        else if (currentEvent == 16)
+        {
+            if(!firstEnemy)
+            {
+                currentLine = "Your speed is impressive. That'll not be enough against a lot of enemies though, so the next thing to learn is <color=red>dashing</color>";
+                currentEvent = 18;
+            }
+
+            else
+            {
+            currentLine = "More punching, less talking!";
+            currentEvent++;
+            }
+        }
+
+        else if (currentEvent == 17)
+        {
+            currentLine = "";
+            currentEvent = 16;
+        }
+
+        else if (currentEvent == 18)
+        {
+            currentLine = "When under heavy fire, <color=red>dash</color> because reasons";
+        }
+
         if (currentLine == "")
         {
             FinishConversation();
@@ -214,5 +334,16 @@ public class TutorialController : Interactive
         {
             StartCoroutine(Talk());
         }
+    }
+
+    public void RegisterDummyDefeat()
+    {
+        GameObject.Find("Player").GetComponent<PlayerController>().SetTutorialText("");
+        currentEvent = 12;
+    }
+
+    public void Retry()
+    {
+        currentEvent = lastCheckpoint;
     }
 }
