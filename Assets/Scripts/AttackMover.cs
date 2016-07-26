@@ -16,7 +16,7 @@ public class AttackMover : MonoBehaviour
         StartCoroutine(TurnLightOff());
     }
 
-   IEnumerator TurnLightOff()
+    IEnumerator TurnLightOff()
     {
         yield return new WaitForSeconds(0.2f);
     }
@@ -25,11 +25,18 @@ public class AttackMover : MonoBehaviour
     {
         if (col.tag == "Player")
         {
-            GameObject.FindGameObjectWithTag("Player").SendMessage("TakeDamage", damage);
-            Destroy(gameObject);
+            if (GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>().TakeDamage(damage))
+            {
+                //Play a certain sound
+            }
+            else
+            {
+                //Play a different sound when the player cannot take damage
+            }
+                Destroy(gameObject);
         }
 
-        else if (col.tag != "Enemy")
+        else
         {
             Destroy(gameObject);
         }

@@ -59,6 +59,9 @@ public class PlayerController : MonoBehaviour
 
     public float interactionRange;
 
+    //How much time is the player invulnerable after dashing?
+    public float dashInvulnerabilityTime;
+
     //Health bar foreground to be depleted when damage is taken
     public Image healthBar;
 
@@ -478,21 +481,32 @@ public class PlayerController : MonoBehaviour
     }
 
     //Should be called everytime the player takes damage
-    void TakeDamage(int damage)
+    public bool TakeDamage(int damage)
     {
+        bool ans = IsInvulnerable();
         if (!isDead)
         {
-            healthPoints -= damage;
-            StartCoroutine(DisplayDamageEffect());
-
-            //'Max' it doesn't take negative values
-            healthBar.fillAmount = Mathf.Max(0, (float)healthPoints / maxHealthPoints);
-
-            if (healthPoints <= 0)
+            if (!ans)
             {
-                Die();
+                healthPoints -= damage;
+                StartCoroutine(DisplayDamageEffect());
+
+                //'Max' it doesn't take negative values
+                healthBar.fillAmount = Mathf.Max(0, (float)healthPoints / maxHealthPoints);
+
+                if (healthPoints <= 0)
+                {
+                    Die();
+                }
             }
         }
+        return ans;
+    }
+
+    //Is the player invulnerable at the moment?
+    bool IsInvulnerable()
+    {
+        return Time.time - lastDash < dashInvulnerabilityTime;
     }
 
     void Die()
@@ -762,7 +776,7 @@ public class PlayerController : MonoBehaviour
     public void DisplayWarning(string warning)
     {
         tutorialText.color = PlayerUtils.warningColor;
-        tutorialText.text = "<size=20>!</size>   " +warning;
+        tutorialText.text = "<color=yellow><size=24>!</size></color>  " + warning;
     }
 
     public void DisplayTip(string tip)
