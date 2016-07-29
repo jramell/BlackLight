@@ -84,6 +84,7 @@ public class PlayerController : MonoBehaviour
 
     public Text tutorialText;
 
+    public GameObject deathUI;
     //--------------------------------------------------------------------------------------------------------------
     //Private variables
     //--------------------------------------------------------------------------------------------------------------
@@ -166,12 +167,8 @@ public class PlayerController : MonoBehaviour
 
     private RaycastHit hit;
 
-
-
     //Pause menu
     private GameObject pauseMenu;
-
-
 
     //Text component that will display interaction information
     public GameObject interactText;
@@ -348,13 +345,14 @@ public class PlayerController : MonoBehaviour
                 Pause();
             }
 
-            //Receive input for retry
-            if (isDead)
+        }
+
+        //Receive input for retry
+        if (isDead)
+        {
+            if (Input.GetKeyDown(KeyCode.T))
             {
-                if (Input.GetKeyDown(KeyCode.R))
-                {
-                    Retry();
-                }
+                Retry();
             }
         }
     }
@@ -488,11 +486,10 @@ public class PlayerController : MonoBehaviour
         {
             if (!ans)
             {
-                healthPoints -= damage;
                 StartCoroutine(DisplayDamageEffect());
 
                 //'Max' it doesn't take negative values
-                healthBar.fillAmount = Mathf.Max(0, (float)healthPoints / maxHealthPoints);
+                ModifyHealth(-damage);
 
                 if (healthPoints <= 0)
                 {
@@ -501,6 +498,14 @@ public class PlayerController : MonoBehaviour
             }
         }
         return ans;
+    }
+
+    //Adds the value passed as a parameter to the current health
+    void ModifyHealth(int modifyValue)
+    {
+        healthPoints += modifyValue;
+        healthPoints = Mathf.Clamp(healthPoints, 0, maxHealthPoints);
+        healthBar.fillAmount = Mathf.Max(0, (float)healthPoints / maxHealthPoints);
     }
 
     //Is the player invulnerable at the moment?
@@ -513,17 +518,7 @@ public class PlayerController : MonoBehaviour
     {
         isDead = true;
         deathSound.Play();
-        GameObject.Find("img_GameOverScreen").GetComponent<Image>().enabled = true;
-        GameObject.Find("txt_GameOverText").GetComponent<Text>().enabled = true;
-        GameObject.Find("txt_RetryText").GetComponent<Text>().enabled = true;
-    }
-
-    void Retry()
-    {
-        GameObject.Find("img_GameOverScreen").GetComponent<Image>().enabled = false;
-        GameObject.Find("txt_GameOverText").GetComponent<Text>().enabled = false;
-        GameObject.Find("txt_RetryText").GetComponent<Text>().enabled = false;
-        healthPoints = maxHealthPoints;
+        deathUI.SetActive(true);
 
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
 
@@ -531,9 +526,15 @@ public class PlayerController : MonoBehaviour
         {
             enemies[i].SetActive(false);
         }
+    }
 
+    void Retry()
+    {
+        ReplenishHealth();
+        isDead = false;
         transform.position = GameObject.Find("Respawn").transform.position;
         GameObject.Find("Baroth").GetComponent<TutorialController>().Retry();
+        deathUI.SetActive(false);
     }
 
     void Dash()
@@ -598,11 +599,11 @@ public class PlayerController : MonoBehaviour
         return Time.time - lastDash > dashCooldown && Time.timeScale > 0 && dashStackAmount > 0;
     }
 
-    void receivePowerUp(string type)
+    public void receivePowerUp(string type)
     {
         if (type == Utils.POWER_UP_SPEED)
         {
-            modifySpeedStacks(1);
+            ModifySpeedStacks(1);
         }
     }
 
@@ -624,16 +625,16 @@ public class PlayerController : MonoBehaviour
         }
 
         losingSpeedStacks = false;
-        modifySpeedStacks(-1);
+        ModifySpeedStacks(-1);
     }
 
     public void ReplenishHealth()
     {
-        healthPoints = maxHealthPoints;
+        ModifyHealth(maxHealthPoints);
     }
 
     //Will sum the parameter to the current speed stacks
-    void modifySpeedStacks(int sum)
+    void ModifySpeedStacks(int sum)
     {
         speedPowerUpStacks += sum;
 
@@ -783,5 +784,10 @@ public class PlayerController : MonoBehaviour
     {
         tutorialText.color = PlayerUtils.normalTutorialColor;
         tutorialText.text = tip;
+    }
+
+    public bool HasMaxHealth()
+    {
+        return healthPoints == maxHealthPoints;
     }
 }

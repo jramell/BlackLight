@@ -23,6 +23,12 @@ public class TutorialController : Interactive
     //First enemy to defeat
     public GameObject firstEnemy;
 
+    public GameObject secondEnemyPrefab;
+
+    public GameObject secondEnemySpawner;
+
+    public GameObject dashUI;
+
     //--------------------------------------------------------------------------------------------------------------
     //Variables
     //--------------------------------------------------------------------------------------------------------------
@@ -54,14 +60,15 @@ public class TutorialController : Interactive
 
     private int currentDialogIndex;
 
+    //Second enemy instance
+    private GameObject secondEnemy; 
+
     //--------------------------------------------------------------------------------------------------------------
     //Functions
     //--------------------------------------------------------------------------------------------------------------
 
     void Start()
     {
-        Debug.Log("currentEvent: " + currentEvent);
-        //currentEvent = 0;
         shouldMove = false;
         StartCoroutine(ManageEvents());
         writingSoundEffect = GameObject.Find("Baroth").GetComponent<AudioSource>();
@@ -301,16 +308,17 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 16)
         {
-            if(!firstEnemy)
+            if (!firstEnemy)
             {
-                currentLine = "Your speed is impressive. That'll not be enough against a lot of enemies though, so the next thing to learn is <color=red>dashing</color>";
+                GameObject.Find("Player").GetComponent<PlayerController>().ReplenishHealth();
+                currentLine = "Your speed is impressive. Did you notice how difficult it gets to dodge the thingies when you're near them though?";
                 currentEvent = 18;
             }
 
             else
             {
-            currentLine = "More punching, less talking!";
-            currentEvent++;
+                currentLine = "More punching, less talking!";
+                currentEvent++;
             }
         }
 
@@ -322,7 +330,77 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 18)
         {
-            currentLine = "When under heavy fire, <color=red>dash</color> because reasons";
+            currentLine = "Well, that's why the next thing to learn is to <color=orange>dash</color>";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 19)
+        {
+            currentLine = "You're immune to damage for a short amount of time after dashing, so it might be a good idea to do it when approaching your enemy";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 20)
+        {
+            lastCheckpoint = currentEvent;
+            currentLine = "Also, you use one <color=red>dash stack</color> each time you dash. These stacks will regenerate after some time, but you can have a maximum of three in stock, so be careful. Here, try defeating this guy without taking damage";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 21)
+        {
+            currentLine = "Also, when I say it <i>might</i> be a good idea, I mean it <i>is</i>";
+            GameObject.Find("Player").GetComponent<PlayerController>().DisplayWarning("Finishing the conversation will spawn an enemy");
+
+            dashUI.SetActive(true);
+            currentEvent++;
+        }
+
+        else if (currentEvent == 22)
+        {
+            GameObject.Find("Player").GetComponent<PlayerController>().SetTutorialText("");
+            secondEnemy = (GameObject) Instantiate(secondEnemyPrefab, secondEnemySpawner.transform.position, Quaternion.identity);
+            currentLine = "";
+            currentEvent++;
+        }
+
+        else if(currentEvent == 23)
+        {
+            //If the second enemy hasn't been defeated
+            if (secondEnemy)
+            {
+                currentLine = "More dashing, less talking!";
+                currentEvent++;
+            }
+
+            //If the second enemy was already defeated
+            else
+            {
+                if (GameObject.Find("Player").GetComponent<PlayerController>().HasMaxHealth())
+                {
+                    currentLine = "Very niceu";
+                    currentEvent = 25;
+                }
+
+                else
+                {
+                    currentLine = "Try again.";
+                    GameObject.Find("Player").GetComponent<PlayerController>().ReplenishHealth();
+                    GameObject.Find("Player").GetComponent<PlayerController>().DisplayWarning("Finishing the conversation will spawn an enemy");
+                    currentEvent = 22;
+                }
+            }
+        }
+
+        else if (currentEvent == 24)
+        {
+            currentLine = "";
+            currentEvent--;
+        }
+
+        else if (currentEvent == 25)
+        {
+            currentLine = "Your test is completed";
         }
 
         if (currentLine == "")
