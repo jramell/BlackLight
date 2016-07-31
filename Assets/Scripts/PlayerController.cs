@@ -72,7 +72,7 @@ public class PlayerController : MonoBehaviour
 
     public Text dashNumberText;
 
-    public GameObject visorUI;
+    public GameObject visorEffect;
 
     public Image speedStackForeground;
 
@@ -384,10 +384,10 @@ public class PlayerController : MonoBehaviour
             timeShiftHasBeenPressed += 0.01f;
             if (timeShiftHasBeenPressed > timeToActivateVission)
             {
-                visorUI.SetActive(true);
-                yield return new WaitForSeconds(0.1f);
+                visorEffect.SetActive(true);
+                yield return new WaitForSeconds(0.2f);
                 ActivateVission();
-                visorUI.SetActive(false);
+                visorEffect.SetActive(false);
                 yield break;
             }
         }
@@ -397,13 +397,15 @@ public class PlayerController : MonoBehaviour
     {
         //Identify GameObjects with Physics.OverlapSphere to identify colliders
         Collider[] colliders = Physics.OverlapSphere(transform.position, vissionRadius);
+
+        //Cycles through all colliders
         for (int i = 0; i < colliders.Length; i++)
         {
-            Debug.Log(colliders[i].gameObject.name);
-            Debug.Log(colliders[i].gameObject.tag);
+        //Identifies spawners
             if (colliders[i].gameObject.tag == "PowerUpPlate_Spawn")
             {
-                colliders[i].gameObject.SendMessage("SpawnPowerUpPlate");
+                //Spawns PowerUpPlates where spawners are
+                colliders[i].gameObject.GetComponent<PowerUpPlateSpawner>().SpawnPowerUpPlate();
             }
         }
     }
@@ -599,7 +601,8 @@ public class PlayerController : MonoBehaviour
         return Time.time - lastDash > dashCooldown && Time.timeScale > 0 && dashStackAmount > 0;
     }
 
-    public void receivePowerUp(string type)
+    //To receive power ups from the plates
+    public void ReceivePowerUp(string type)
     {
         if (type == Utils.POWER_UP_SPEED)
         {
@@ -644,6 +647,7 @@ public class PlayerController : MonoBehaviour
         }
 
         float effect = 1 + speedStackEffect * speedPowerUpStacks;
+
         speed = baseSpeed * effect;
 
         //Modify dash force in the same way speed is

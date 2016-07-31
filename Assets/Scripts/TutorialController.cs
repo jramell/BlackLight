@@ -29,6 +29,8 @@ public class TutorialController : Interactive
 
     public GameObject dashUI;
 
+    public GameObject visorUI;
+
     //--------------------------------------------------------------------------------------------------------------
     //Variables
     //--------------------------------------------------------------------------------------------------------------
@@ -61,7 +63,7 @@ public class TutorialController : Interactive
     private int currentDialogIndex;
 
     //Second enemy instance
-    private GameObject secondEnemy; 
+    private GameObject secondEnemy;
 
     //--------------------------------------------------------------------------------------------------------------
     //Functions
@@ -86,18 +88,38 @@ public class TutorialController : Interactive
             }
         }
 
-        else if (currentEvent > 4)
+        if (currentEvent >= 26 && currentEvent < 28)
         {
-            gameObject.tag = "Interactive";
+            Collider[] colliders = Physics.OverlapSphere(transform.position, 10);
+            for (int i = 0; i < colliders.Length; i++)
+            {
+                if (colliders[i].gameObject.tag == "PowerUpPlate")
+                {
+                    //GameObject.Find("Player").GetComponent<PlayerController>().SetTutorialText("");
+                    GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("Touch the spot to get a power up");
+                    currentEvent = 28;
+                }
+            }
+        }
+
+        if (currentEvent >= 28 && currentEvent < 30)
+        {
+            bool touchedPowerUp = true;
+            Collider[] colliders = Physics.OverlapSphere(transform.position, 10);
+            for (int i = 0; i < colliders.Length; i++)
+            {
+                if (colliders[i].gameObject.tag == "PowerUpPlate")
+                {
+                    touchedPowerUp = false;
+                }
+            }
+
+            if(touchedPowerUp)
+            {
+                currentEvent = 30;
+            }
         }
     }
-
-    //void initializeDialogList()
-    //{
-    //    dialog.Add("Hello, I'm Baroth");
-    //    dialog.Add("You can't see, huh? Let's fix that");
-    //    dialog.Add("");
-    //}
 
     IEnumerator ManageEvents()
     {
@@ -161,11 +183,11 @@ public class TutorialController : Interactive
         if (currentEvent == 0)
         {
             GameObject.Find("Player").GetComponent<PlayerController>().SetTutorialText("Press F to continue");
-        } 
+        }
 
         else if (currentEvent == 1)
         {
-           
+
         }
     }
 
@@ -193,14 +215,12 @@ public class TutorialController : Interactive
 
     void ContinueConversation()
     {
-        //Debug.Log("continued conversation with currentEvent: " + currentEvent);
         if (currentEvent == 0)
         {
             GameObject.Find("Player").GetComponent<PlayerController>().SetTutorialText("");
             currentLine = "(Something about the fact that you can't see)";
             currentEvent++;
         }
-        //Debug.Log("currentLine after if: " + currentLine);
 
         else if (currentEvent == 1)
         {
@@ -359,12 +379,12 @@ public class TutorialController : Interactive
         else if (currentEvent == 22)
         {
             GameObject.Find("Player").GetComponent<PlayerController>().SetTutorialText("");
-            secondEnemy = (GameObject) Instantiate(secondEnemyPrefab, secondEnemySpawner.transform.position, Quaternion.identity);
+            secondEnemy = (GameObject)Instantiate(secondEnemyPrefab, secondEnemySpawner.transform.position, Quaternion.identity);
             currentLine = "";
             currentEvent++;
         }
 
-        else if(currentEvent == 23)
+        else if (currentEvent == 23)
         {
             //If the second enemy hasn't been defeated
             if (secondEnemy)
@@ -378,7 +398,7 @@ public class TutorialController : Interactive
             {
                 if (GameObject.Find("Player").GetComponent<PlayerController>().HasMaxHealth())
                 {
-                    currentLine = "Very niceu";
+                    currentLine = "Amazing...";
                     currentEvent = 25;
                 }
 
@@ -400,7 +420,39 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 25)
         {
-            currentLine = "Your test is completed";
+            currentLine = "Final lesson then. This one is about manipulating the environment's energy; it's different for everyone, but I'd guess yours is related to speed";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 26)
+        {
+            currentLine = "First step is visualization. There're certain spots in which energy is more dense and can be used easily. Concentrate and you'll be able to see them";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 27)
+        {
+            visorUI.SetActive(true);
+            currentLine = "";
+            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("Hold X to concentrate");
+            currentEvent--;
+        }
+
+        else if (currentEvent == 28)
+        {
+            currentLine = "That's it. Now go to the spot and something should happen";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 29)
+        {
+            currentLine = "";
+            currentEvent--;
+        }
+
+        else if (currentEvent == 30)
+        {
+            currentLine = "Well done";
         }
 
         if (currentLine == "")

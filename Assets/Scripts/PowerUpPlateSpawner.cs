@@ -13,7 +13,7 @@ public class PowerUpPlateSpawner : MonoBehaviour
         spawned = false;
     }
 
-    void SpawnPowerUpPlate()
+    public void SpawnPowerUpPlate()
     {
         if (!spawned)
         {
