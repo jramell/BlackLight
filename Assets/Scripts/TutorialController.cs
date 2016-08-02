@@ -434,7 +434,7 @@ public class TutorialController : Interactive
         {
             visorUI.SetActive(true);
             currentLine = "";
-            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("Hold X to concentrate");
+            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("Hold LeftShift to concentrate");
             currentEvent--;
         }
 
@@ -452,7 +452,40 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 30)
         {
-            currentLine = "Well done";
+            currentLine = "Nice, I knew it had something to do with speed. Apparently, each stack makes you faster and your " +
+               "dashes more effective. You lose them after some time, though, and surely there's a limit to how many you can have at a time";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 31)
+        {
+            currentLine = "Also, you can prolly only see them spots a few meters around you each time you concentrate, so it's prolly "+ 
+                "a good idea to try to see them constantly while fighting. ";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 32)
+        {
+            currentLine = "Er... Hmm... Uh...";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 33)
+        {
+            currentLine = "I don't really have a way to explain that better right now. Just spam LeftShift if you want to see more power ups. " + 
+                "If I come up with an idea to teach you, I'll put it here";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 34)
+        {
+            currentLine = "";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 35)
+        {
+
         }
 
         if (currentLine == "")

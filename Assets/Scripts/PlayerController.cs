@@ -313,7 +313,7 @@ public class PlayerController : MonoBehaviour
                     StartCoroutine(ChargeStacks());
                 }
 
-                if (Input.GetKeyDown(KeyCode.X))
+                if (Input.GetKeyDown(KeyCode.LeftShift))
                 {
                     StartCoroutine(ActivateEnergyVission());
                 }
@@ -376,21 +376,35 @@ public class PlayerController : MonoBehaviour
     IEnumerator ActivateEnergyVission()
     {
         float timeShiftHasBeenPressed = 0.0f;
+        float originalAlpha = visorEffect.GetComponent<Image>().color.a;
+        Color tempColor = visorEffect.GetComponent<Image>().color;
+        tempColor.a = 0;
+        visorEffect.GetComponent<Image>().color = tempColor;
+        visorEffect.SetActive(true);
 
+        bool done = false;
         //If the player stops pressing X, the energy vission stops activating
-        while (Input.GetKey(KeyCode.X))
+        while (Input.GetKey(KeyCode.LeftShift) && !done)
         {
             yield return new WaitForSeconds(0.01f);
             timeShiftHasBeenPressed += 0.01f;
-            if (timeShiftHasBeenPressed > timeToActivateVission)
-            {
-                visorEffect.SetActive(true);
-                yield return new WaitForSeconds(0.2f);
-                ActivateVission();
-                visorEffect.SetActive(false);
-                yield break;
-            }
+            done = timeShiftHasBeenPressed > timeToActivateVission;
+            //Percentage of the time that has charged is translated to alpha percentage and then assigned to the effect
+            //The 0.5f at the end is so the maximum alpha to be achieved before activation is 50% the original
+            tempColor.a = (timeShiftHasBeenPressed / timeToActivateVission) * originalAlpha * 0.5f;
+            visorEffect.GetComponent<Image>().color = tempColor;
         }
+
+        if (done)
+        {
+            tempColor.a = originalAlpha;
+            visorEffect.GetComponent<Image>().color = tempColor;
+            ActivateVission();
+            visorEffect.GetComponent<AudioSource>().Play();
+            yield return new WaitForSeconds(0.2f);
+        }
+
+        visorEffect.SetActive(false);
     }
 
     void ActivateVission()
@@ -401,7 +415,7 @@ public class PlayerController : MonoBehaviour
         //Cycles through all colliders
         for (int i = 0; i < colliders.Length; i++)
         {
-        //Identifies spawners
+            //Identifies spawners
             if (colliders[i].gameObject.tag == "PowerUpPlate_Spawn")
             {
                 //Spawns PowerUpPlates where spawners are
