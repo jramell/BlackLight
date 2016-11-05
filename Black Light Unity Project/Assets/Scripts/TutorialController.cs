@@ -131,7 +131,7 @@ public class TutorialController : Interactive
             yield return new WaitForSeconds(1);
 
             //Starts talking, then leave it to the player to continue
-            currentLine = "Wow, hello. This is a demo, and the dialog is not planned yet";
+            currentLine = "Hey there. This is a demo that serves as a proof of concept for certain game mechanics.";
             //GameObject.Find("Player").GetComponent<PlayerController>().SetInteractivity(false);
             yield return StartCoroutine(Talk());
             yield break;
@@ -185,10 +185,6 @@ public class TutorialController : Interactive
             GameObject.Find("Player").GetComponent<PlayerController>().SetTutorialText("Press F to continue");
         }
 
-        else if (currentEvent == 1)
-        {
-
-        }
     }
 
     void FinishConversation()
@@ -218,7 +214,7 @@ public class TutorialController : Interactive
         if (currentEvent == 0)
         {
             GameObject.Find("Player").GetComponent<PlayerController>().SetTutorialText("");
-            currentLine = "(Something about the fact that you can't see)";
+            currentLine = "I, Blue P., will be your guide. Now, allow me to turn on the lights.";
             currentEvent++;
         }
 
@@ -230,7 +226,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 2)
         {
-            currentLine = "Let's get outta here";
+            currentLine = "Good! Now you know you can interact with certain objects by pressing F. Follow me outside.";
             currentEvent++;
         }
 
