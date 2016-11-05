@@ -82,7 +82,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Fonts\Title\KGALittleSwag\KGFonts-TOU.txt" />
-    <None Include="Assets\Fonts\Title\red_undead\redundead.txt" />
     <None Include="Assets\Imports\Fantasy SFX for Particle Distort Texture effect library\readme_Fantasy SFX for Particle Distort Texture effect library.txt" />
     <None Include="Assets\Shaders\AdditiveMask.shader" />
     <None Include="Assets\devandart\Polygonix\Standard Assets\Effects\GlassRefraction\Shaders\GlassStainedBumpDistort.shader" />

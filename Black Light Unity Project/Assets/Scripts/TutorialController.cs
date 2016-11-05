@@ -131,7 +131,7 @@ public class TutorialController : Interactive
             yield return new WaitForSeconds(1);
 
             //Starts talking, then leave it to the player to continue
-            currentLine = "Hey there. This is a demo that serves as a proof of concept for certain game mechanics.";
+            currentLine = "Hey there. This is a demo that serves as a proof of concept for certain game mechanics. I, Blue P., will be your guide.";
             //GameObject.Find("Player").GetComponent<PlayerController>().SetInteractivity(false);
             yield return StartCoroutine(Talk());
             yield break;
@@ -214,7 +214,7 @@ public class TutorialController : Interactive
         if (currentEvent == 0)
         {
             GameObject.Find("Player").GetComponent<PlayerController>().SetTutorialText("");
-            currentLine = "I, Blue P., will be your guide. Now, allow me to turn on the lights.";
+            currentLine = "Now, allow me to turn on the lights.";
             currentEvent++;
         }
 
@@ -239,7 +239,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 4)
         {
-            currentLine = "You're numb, huh? Don't worry. Here's something for you to track your own health";
+            currentLine = "Beautiful, huh? Well lit and flat, perfect for practice. Here, you can track your health using this.";
             currentEvent++;
         }
 
@@ -251,25 +251,25 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 6)
         {
-            currentLine = "There. Now, I'll teach you to fight so you're ready when the time comes";
+            currentLine = "There. Now, time for the main event: Fighting mechanics. You can call me Blue, by the way.";
             currentEvent++;
         }
 
         else if (currentEvent == 7)
         {
-            currentLine = "In most fights in this world, your foe'll prolly have some form of ranged attack, and you prolly won't";
+            currentLine = "The basic enemy has a simple ranged attack that'll damage you on contact.";
             currentEvent++;
         }
 
         else if (currentEvent == 8)
         {
-            currentLine = "That's why you'll need to learn how to punch first. Go and punch that dummy 'till it disspears, then come back";
+            currentLine = "To defeat it, you'll need to know how to <i>hit</i> first. I'll spawn a dummy for you to punch until you get the hang of it.";
             currentEvent++;
         }
 
         else if (currentEvent == 9)
         {
-            currentLine = "It can take a lot of hits, specially from a rookie like you, so don't feel bad if you take some time";
+            currentLine = "Talk to me when you're done with it and feel ready to move on.";
             currentEvent++;
         }
 
@@ -286,13 +286,14 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 11)
         {
-            currentLine = "It can take a lot of hits, specially from a rookie like you, so don't feel bad if it takes some time";
+            currentLine = "Talk to me when you're done with it.";
             currentEvent = 10;
         }
 
         else if (currentEvent == 12)
         {
-            currentLine = "Wow. That was fast.";
+            currentLine = "You're done? Okay. I'll take back the dummy and we'll move on to the next step: real combat.";
+            dummy.SetActive(false);
             currentEvent++;
         }
 
@@ -495,7 +496,7 @@ public class TutorialController : Interactive
         }
     }
 
-    public void RegisterDummyDefeat()
+    public void RegisterDummyPunch()
     {
         GameObject.Find("Player").GetComponent<PlayerController>().SetTutorialText("");
         currentEvent = 12;

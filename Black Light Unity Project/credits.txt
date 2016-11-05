@@ -1,2 +1,6 @@
 Font: Varsity. Author: Brøderbund Software. Link: http://www.dafont.com/es/broderbund-software.d3027
 
+Font: Continuum. Author: Brøderbund Software. Link: http://www.dafont.com/es/broderbund-software.d3027
+
+Font: Basic Title Font. Author: Przemyslaw Hoffer. Link: http://www.dafont.com/es/przemyslaw-hoffer.d4259
+

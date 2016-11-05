@@ -5,14 +5,15 @@ public class DummyController : MonoBehaviour {
 
     public int health;
 
+    private bool punched = false;
+
 	// Use this for initialization
 	void TakeDamage(int damage)
     {
-        health -= damage;
-
-        if(health <= 0)
+        if (!punched)
         {
-            Die();
+            GameObject.Find("Baroth").GetComponent<TutorialController>().RegisterDummyPunch();
+            punched = true;
         }
     }
 	
@@ -20,6 +21,5 @@ public class DummyController : MonoBehaviour {
 	void Die()
     {
         Destroy(gameObject);
-        GameObject.Find("Baroth").GetComponent<TutorialController>().RegisterDummyDefeat();
     }
 }
