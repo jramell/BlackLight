@@ -67,6 +67,8 @@ public class TutorialController : Interactive
     //Second enemy instance
     private GameObject secondEnemy;
 
+    public GameObject sfxContainer;
+
     //--------------------------------------------------------------------------------------------------------------
     //Functions
     //--------------------------------------------------------------------------------------------------------------
@@ -141,6 +143,10 @@ public class TutorialController : Interactive
 
         if (currentEvent == 1)
         {
+            yield return new WaitForSeconds(0.3f);
+            AudioSource audio = sfxContainer.GetComponents<AudioSource>()[1];
+            audio.Play();
+            yield return new WaitForSeconds(audio.clip.length + 0.05f);
             roomLight.SetActive(true);
             gameObject.tag = "Interactive";
             GameObject.Find("Player").GetComponent<PlayerController>().SetCameraMovementEnabled(true);
@@ -195,6 +201,7 @@ public class TutorialController : Interactive
                 yield return new WaitForSeconds(0.01f);
             }
 
+            sfxContainer.GetComponents<AudioSource>()[0].Play();
             currentEvent++;
             GameObject.Find("Player").GetComponent<PlayerController>().EnableInteraction();
             yield break;
@@ -247,7 +254,7 @@ public class TutorialController : Interactive
         if (currentEvent == 0)
         {
             GameObject.Find("Player").GetComponent<PlayerController>().SetTutorialText("");
-            currentLine = "Now, allow me to turn on the lights.";
+            currentLine = "Now,|0.1| allow me to turn on the lights.";
             currentEvent++;
         }
 
@@ -259,7 +266,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 2)
         {
-            currentLine = "Good!|0.5| Now you know you can interact with certain objects by pressing F.|0.5| Follow me outside.";
+            currentLine = "Good!|0.5| You just learned you can interact with certain objects by pressing F.|0.5| Follow me outside.";
             currentEvent++;
         }
 
@@ -296,13 +303,13 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 8)
         {
-            currentLine = "To defeat it, you'll need to learn how to punch first. I'll spawn a dummy for you to hit until you get the hang of it.";
+            currentLine = "To defeat it,|0.1| you'll need to learn how to punch first.|0.3| I'll spawn a dummy for you to hit until you get the hang of it.";
             currentEvent++;
         }
 
         else if (currentEvent == 9)
         {
-            currentLine = "Talk to me when you're done with it.";
+            currentLine = "Talk to me when you're done.";
             currentEvent++;
         }
 
@@ -319,7 +326,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 11)
         {
-            currentLine = "Talk to me when you're done with it.";
+            currentLine = "Go ahead.|0.4| Punch it.";
             currentEvent = 10;
         }
 
@@ -429,13 +436,13 @@ public class TutorialController : Interactive
                 if (GameObject.Find("Player").GetComponent<PlayerController>().HasMaxHealth())
                 {
                     GameObject.Find("Player").GetComponent<PlayerController>().SetTutorialText("");
-                    currentLine = "Well done!";
+                    currentLine = "Well done!|0.3| So far,|0.1| you've learned to interact,|0.1| punch,|0.1| dash|0.1| and dodge.";
                     currentEvent = 25;
                 }
 
                 else
                 {
-                    currentLine = "Not that straightforward this time, huh?|0.4| Here, try again.";
+                    currentLine = "Not that straight forward this time, huh?|0.4| Here, try again.";
                     GameObject.Find("Player").GetComponent<PlayerController>().ReplenishHealth();
                     GameObject.Find("Player").GetComponent<PlayerController>().DisplayWarning("Finishing the conversation will spawn an enemy");
                     currentEvent = 22;

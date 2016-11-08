@@ -62,6 +62,9 @@ public class PlayerController : MonoBehaviour
     //How much time is the player invulnerable after dashing?
     public float dashInvulnerabilityTime;
 
+    //The time it takes for health to smooth into its new fill amount
+    public float healthUpdateTime;
+
     //Health bar foreground to be depleted when damage is taken
     public Image healthBar;
 
@@ -253,8 +256,11 @@ public class PlayerController : MonoBehaviour
                 if (movementEnabled)
                 {
                     //Moves the player
-                    transform.Translate(new Vector3(Input.GetAxis("Horizontal") * speed * Time.deltaTime, 0,
-                                        Input.GetAxis("Vertical") * speed * Time.deltaTime));
+                    Vector3 translate = new Vector3(Input.GetAxis("Horizontal") * speed * Time.deltaTime, 0,
+                                        Input.GetAxis("Vertical") * speed * Time.deltaTime);
+                    transform.Translate(translate);
+
+                    //if(translate.Equals)
                 }
 
                 if (cameraMovementEnabled)
@@ -493,6 +499,9 @@ public class PlayerController : MonoBehaviour
     IEnumerator DisplayDamageEffect()
     {
         damageEffect.SetActive(true);
+        AudioSource audio = damageEffect.GetComponent<AudioSource>();
+        audio.pitch = Random.Range(0.9f, 1.1f);
+        audio.Play();
         yield return new WaitForSeconds(0.2f);
         damageEffect.SetActive(false);
     }
@@ -522,9 +531,36 @@ public class PlayerController : MonoBehaviour
     //Adds the value passed as a parameter to the current health
     void ModifyHealth(int modifyValue)
     {
+        
         healthPoints += modifyValue;
         healthPoints = Mathf.Clamp(healthPoints, 0, maxHealthPoints);
-        healthBar.fillAmount = Mathf.Max(0, (float)healthPoints / maxHealthPoints);
+        StartCoroutine(smoothHealthUpdate());
+    }
+
+    IEnumerator smoothHealthUpdate()
+    {
+        float targetFillAmount = Mathf.Max(0, (float)healthPoints / maxHealthPoints);
+        float rateOfChange = (healthBar.fillAmount - targetFillAmount) * (1 / (healthUpdateTime * 100));
+
+        //Because comparing floating points is hard, != would work strangely. That's why there is a case for > and another for <
+        if (healthBar.fillAmount < targetFillAmount)
+        {
+            rateOfChange = rateOfChange * -1;
+            while(healthBar.fillAmount < targetFillAmount)
+            {
+                healthBar.fillAmount += rateOfChange;
+                yield return new WaitForSeconds(0.01f);
+            }
+        }
+
+        else
+        {
+            while(healthBar.fillAmount > targetFillAmount)
+            {
+                healthBar.fillAmount -= rateOfChange;
+                yield return new WaitForSeconds(0.01f);
+            }
+        }
     }
 
     //Is the player invulnerable at the moment?

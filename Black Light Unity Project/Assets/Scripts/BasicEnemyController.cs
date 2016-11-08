@@ -36,7 +36,7 @@ public class BasicEnemyController : MonoBehaviour
     {
         player = GameObject.FindGameObjectWithTag("Player");
         isDead = false;
-        seriousFight = false;
+        seriousFight = true;
     }
 
     void Update()
@@ -63,7 +63,8 @@ public class BasicEnemyController : MonoBehaviour
 
                 lastAttack = Time.time;
                 Object instantiated = Instantiate(attackObject, attackSpawner.transform.position, transform.rotation);
-                GetComponent<AudioSource>().Play();
+                AudioSource audioCopy = GetComponent<AudioSource>();
+                audioCopy.pitch = Random.Range(0.7f, 1.3f);
                 Destroy(instantiated, 3);
             }
         }
