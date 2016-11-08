@@ -168,7 +168,7 @@ public class PlayerController : MonoBehaviour
     private RaycastHit hit;
 
     //Pause menu
-    private GameObject pauseMenu;
+    public GameObject pauseMenu;
 
     //Text component that will display interaction information
     public GameObject interactText;
@@ -228,7 +228,7 @@ public class PlayerController : MonoBehaviour
         camera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
         crosshairSuccess = GameObject.Find("Crosshair_Success").GetComponent<Image>();
         crosshairFail = GameObject.Find("Crosshair_Fail").GetComponent<Image>();
-        pauseMenu = GameObject.Find("PauseMenu");
+        //pauseMenu = GameObject.Find("PauseMenu");
        // canSkipText = true;
     }
 
@@ -831,5 +831,15 @@ public class PlayerController : MonoBehaviour
     public bool HasMaxHealth()
     {
         return healthPoints == maxHealthPoints;
+    }
+
+    public void DisableInteraction()
+    {
+        canInteract = false;
+    }
+
+    public void EnableInteraction()
+    {
+        canInteract = true;
     }
 }

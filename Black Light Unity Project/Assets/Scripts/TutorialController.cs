@@ -31,6 +31,8 @@ public class TutorialController : Interactive
 
     public GameObject visorUI;
 
+    public float timeOfHealthChange;
+
     //--------------------------------------------------------------------------------------------------------------
     //Variables
     //--------------------------------------------------------------------------------------------------------------
@@ -131,7 +133,7 @@ public class TutorialController : Interactive
             yield return new WaitForSeconds(1);
 
             //Starts talking, then leave it to the player to continue
-            currentLine = "Hey there!|1| This is a demo that serves as a proof of concept for certain game mechanics.|1| I,|0.2| Blue P.,|0.2| will be your guide.";
+            currentLine = "Hey there!|1| This is a demo that serves as a proof of concept for certain game mechanics.|0.7| I,|0.2| Blue P.,|0.2| will be your guide.";
             //GameObject.Find("Player").GetComponent<PlayerController>().SetInteractivity(false);
             yield return StartCoroutine(Talk());
             yield break;
@@ -162,8 +164,39 @@ public class TutorialController : Interactive
 
         if (currentEvent == 5)
         {
+            GameObject.Find("Player").GetComponent<PlayerController>().DisableInteraction();
+            Vector3 initialScale = healthBar.transform.localScale;
+            Vector3 tempScale = new Vector3(1.6f, 4, 1);
+            RectTransform healthBarRect = healthBar.GetComponent<RectTransform>();
+            Vector3 initialPosition = healthBarRect.localPosition;
+            Debug.Log("healthBar initialPosition: " + initialPosition);
+            Vector3 tempPosition = new Vector3(70, -85, 0);
+            healthBarRect.localScale = tempScale;
+            healthBarRect.localPosition = tempPosition;
             healthBar.SetActive(true);
+
+            //Health Bar size change
+            //Because with 0.01f per delta, there's 1000 deltas per second
+            float timeOfChange = 1 / (timeOfHealthChange * 100);
+            float rateOfChangeX = (tempScale.x - initialScale.x) * timeOfChange;
+            float rateOfChangeY = (tempScale.y - initialScale.y) * timeOfChange;
+            float rateOfPositionChangeX = (tempPosition.x - initialPosition.x) * timeOfChange;
+            //Because both y localPositions are negative
+            float rateOfPositionChangeY = (initialPosition.y - tempPosition.y) * timeOfChange;
+            while(healthBarRect.localScale != initialScale)
+            {
+                tempScale.x -= rateOfChangeX;
+                tempScale.y -= rateOfChangeY;
+                healthBarRect.localScale = tempScale;
+                tempPosition.x -= rateOfPositionChangeX;
+                tempPosition.y += rateOfPositionChangeY;
+                healthBarRect.localPosition = tempPosition;
+                //Gets slower as the time gets shorter... bad code
+                yield return new WaitForSeconds(0.01f);
+            }
+
             currentEvent++;
+            GameObject.Find("Player").GetComponent<PlayerController>().EnableInteraction();
             yield break;
         }
     }
@@ -239,7 +272,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 4)
         {
-            currentLine = "Beautiful, huh?|0.3| Well lit and flat,|0.2| perfect for practice.|0.7| Here, you can track your health using this.";
+            currentLine = "Beautiful, huh?|0.3| Well lit and flat,|0.2| perfect for practice.|0.7| Here,|0.2| you can track your health using this.";
             currentEvent++;
         }
 
@@ -263,13 +296,13 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 8)
         {
-            currentLine = "To defeat it, you'll need to know how to <i>hit</i> first. I'll spawn a dummy for you to punch until you get the hang of it.";
+            currentLine = "To defeat it, you'll need to learn how to punch first. I'll spawn a dummy for you to hit until you get the hang of it.";
             currentEvent++;
         }
 
         else if (currentEvent == 9)
         {
-            currentLine = "Talk to me when you're done with it and feel ready to move on.";
+            currentLine = "Talk to me when you're done with it.";
             currentEvent++;
         }
 
@@ -292,7 +325,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 12)
         {
-            currentLine = "You're done? Okay.|0.5| I'll take back the dummy and we'll move on to the next step.";
+            currentLine = "You're done?|0.5| Okay.|0.3| I'll take back the dummy and we'll move on to the next step.";
             dummy.SetActive(false);
             currentEvent++;
         }
@@ -300,13 +333,13 @@ public class TutorialController : Interactive
         else if (currentEvent == 13)
         {
             lastCheckpoint = currentEvent;
-            currentLine = "Done. Welp,|0.2| the next step is real combat.|0.4| Don't you want an opportunity to do it against something a little more challenging this time?";
+            currentLine = "Done.|0.3| Welp,|0.2| the next step is real combat.";
             currentEvent++;
         }
 
         else if (currentEvent == 14)
         {
-            currentLine = "I'll create a basic enemy for you.|0.4| Should be easy enough.";
+            currentLine = "I'll create a basic enemy for you.|0.3| Should be easy enough.";
             GameObject.Find("Player").GetComponent<PlayerController>().DisplayWarning("Finishing this conversation will spawn an enemy");
             currentEvent++;
         }
@@ -328,7 +361,7 @@ public class TutorialController : Interactive
             if (!firstEnemy)
             {
                 GameObject.Find("Player").GetComponent<PlayerController>().ReplenishHealth();
-                currentLine = "Easy, right?|1| Did you notice how difficult it gets to dodge its attacks when as you approach him, though?";
+                currentLine = "Easy, right?|0.5| Did you notice how difficult it gets to dodge its attacks when as you approach him, though?";
                 currentEvent = 18;
             }
 
@@ -347,26 +380,26 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 18)
         {
-            currentLine = "Yeah, you probably did. That's why the next thing to learn is to <color=orange>dash</color>";
+            currentLine = "Yeah, you probably did.|0.3| That's why the next thing to learn is to dash.";
             currentEvent++;
         }
 
         else if (currentEvent == 19)
         {
-            currentLine = "You're immune to damage for a short amount of time after dashing, so it might be a good idea to do it when approaching your enemy";
+            currentLine = "It's simple:|0.2| you press Q to dash left, E to dash right, and R to dash forward.";
             currentEvent++;
         }
 
         else if (currentEvent == 20)
         {
             lastCheckpoint = currentEvent;
-            currentLine = "Also, you use one <color=red>dash stack</color> each time you dash. These stacks will regenerate after some time, but you can have a maximum of three in stock, so be careful. Here, try defeating this guy without taking damage";
+            currentLine = "However,|0.1| you only have so much stamina.|0.1| Your dash attacks are just below your health.";
             currentEvent++;
         }
 
         else if (currentEvent == 21)
         {
-            currentLine = "Also, when I say it <i>might</i> be a good idea, I mean it <i>is</i>";
+            currentLine = "Also, you become invulnerable for a short time after dashing.|0.5| Test it by defeating this enemy.|0.1|.|0.1|.|0.3| without taking damage!";
             GameObject.Find("Player").GetComponent<PlayerController>().DisplayWarning("Finishing the conversation will spawn an enemy");
 
             dashUI.SetActive(true);
@@ -375,7 +408,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 22)
         {
-            GameObject.Find("Player").GetComponent<PlayerController>().SetTutorialText("");
+            GameObject.Find("Player").GetComponent<PlayerController>().SetTutorialText("Press Q, E or R to dash");
             secondEnemy = (GameObject)Instantiate(secondEnemyPrefab, secondEnemySpawner.transform.position, Quaternion.identity);
             currentLine = "";
             currentEvent++;
@@ -395,13 +428,14 @@ public class TutorialController : Interactive
             {
                 if (GameObject.Find("Player").GetComponent<PlayerController>().HasMaxHealth())
                 {
-                    currentLine = "Amazing...";
+                    GameObject.Find("Player").GetComponent<PlayerController>().SetTutorialText("");
+                    currentLine = "Well done!";
                     currentEvent = 25;
                 }
 
                 else
                 {
-                    currentLine = "Try again.";
+                    currentLine = "Not that straightforward this time, huh?|0.4| Here, try again.";
                     GameObject.Find("Player").GetComponent<PlayerController>().ReplenishHealth();
                     GameObject.Find("Player").GetComponent<PlayerController>().DisplayWarning("Finishing the conversation will spawn an enemy");
                     currentEvent = 22;
