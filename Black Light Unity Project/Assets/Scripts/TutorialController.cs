@@ -300,13 +300,13 @@ public class TutorialController : Interactive
         else if (currentEvent == 13)
         {
             lastCheckpoint = currentEvent;
-            currentLine = "Okay, now some real combat experience. Defeat the guy that'll appear as soon as I'm done talking";
+            currentLine = "Done. Welp, now you know how to hit stuff. Don't you want an opportunity to do it against something a little more <i>challenging</i> this time?";
             currentEvent++;
         }
 
         else if (currentEvent == 14)
         {
-            currentLine = "You'll know where he is 'cuz he'll start shooting energy thingies at ya";
+            currentLine = "I'll create a basic enemy for you. Should be easy enough.";
             GameObject.Find("Player").GetComponent<PlayerController>().DisplayWarning("Finishing this conversation will spawn an enemy");
             currentEvent++;
         }
@@ -328,13 +328,13 @@ public class TutorialController : Interactive
             if (!firstEnemy)
             {
                 GameObject.Find("Player").GetComponent<PlayerController>().ReplenishHealth();
-                currentLine = "Your speed is impressive. Did you notice how difficult it gets to dodge the thingies when you're near them though?";
+                currentLine = "Easy, right? Did you notice how difficult it gets to dodge its attacks when as you approach him, though?";
                 currentEvent = 18;
             }
 
             else
             {
-                currentLine = "More punching, less talking!";
+                currentLine = "Reading this doesn't seem like the best use of your time.";
                 currentEvent++;
             }
         }
@@ -347,7 +347,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 18)
         {
-            currentLine = "Well, that's why the next thing to learn is to <color=orange>dash</color>";
+            currentLine = "Yeah, you probably did. That's why the next thing to learn is to <color=orange>dash</color>";
             currentEvent++;
         }
 

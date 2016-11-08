@@ -725,15 +725,15 @@ public class PlayerController : MonoBehaviour
         cameraMovementEnabled = newValue;
     }
 
-    public IEnumerator IntroduceText(string textToIntroduce, AudioSource writingSoundEffect, int numberOfPlays)
-    {
-        yield return new WaitForSeconds(0.01f);
-        //textBeingIntroduced = textToIntroduce;
-        //canInteract = false;
-        //introduceTextCoroutineInstance = PlayerUtils.IntroduceText(textToIntroduce, dialogText, textWriteDelay, writingSoundEffect, numberOfPlays);
-        //yield return StartCoroutine(introduceTextCoroutineInstance);
-        //introduceTextCoroutineInstance = null;
-    }
+    //public IEnumerator IntroduceText(string textToIntroduce, AudioSource writingSoundEffect, int numberOfPlays)
+    //{
+    //    yield return new WaitForSeconds(0.01f);
+    //    //textBeingIntroduced = textToIntroduce;
+    //    //canInteract = false;
+    //    //introduceTextCoroutineInstance = PlayerUtils.IntroduceText(textToIntroduce, dialogText, textWriteDelay, writingSoundEffect, numberOfPlays);
+    //    //yield return StartCoroutine(introduceTextCoroutineInstance);
+    //    //introduceTextCoroutineInstance = null;
+    //}
 
     public IEnumerator IntroduceNewText(string textToIntroduce, AudioSource writingSoundEffect, float characterWriteDelay, float timeBetweenPlays, GameObject talkingWith)
     {
@@ -742,31 +742,38 @@ public class PlayerController : MonoBehaviour
         objectTalkingTo = talkingWith;
         introducingText = true;
         ClearText();
-        char[] textInChar = textToIntroduce.ToCharArray();
+
+        //Separated by time
+        string[] textGroup = textToIntroduce.Split('|');
+
+        char[] textInChar = textGroup[0].ToCharArray();
         float counterForPlaying = 0.0f;
         bool shouldPlay = writingSoundEffect != null;
 
-        for (int i = 0; i < textInChar.Length; i++)
+        for (int j = 0; j < textGroup.Length; j++)
         {
-            if (shouldSkipText)
+            for (int i = 0; i < textInChar.Length; i++)
             {
-                dialogText.text = textToIntroduce;
-                shouldSkipText = false;
-                break;
-            }
+                if (shouldSkipText)
+                {
+                    dialogText.text = textToIntroduce;
+                    shouldSkipText = false;
+                    break;
+                }
 
-            if (shouldPlay)
-            {
-                writingSoundEffect.Play();
-            }
+                if (shouldPlay)
+                {
+                    writingSoundEffect.Play();
+                }
 
-            else
-            {
-                counterForPlaying += characterWriteDelay;
+                else
+                {
+                    counterForPlaying += characterWriteDelay;
+                }
+                shouldPlay = counterForPlaying > timeBetweenPlays;
+                dialogText.text += textInChar[i];
+                yield return new WaitForSeconds(characterWriteDelay);
             }
-            shouldPlay = counterForPlaying > timeBetweenPlays;
-            dialogText.text += textInChar[i];
-            yield return new WaitForSeconds(characterWriteDelay);
         }
         introducingText = false;
     }
