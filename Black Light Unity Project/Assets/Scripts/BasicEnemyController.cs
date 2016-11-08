@@ -26,6 +26,9 @@ public class BasicEnemyController : MonoBehaviour
 
     private bool isDead;
 
+    //Starts attacking when player is closer than this distance
+    public float distanceToAttack;
+
     //Unused something
     private bool seriousFight;
 
@@ -44,23 +47,27 @@ public class BasicEnemyController : MonoBehaviour
 
     void Attack()
     {
-        if (Time.time - lastAttack > lastAttackCooldown)
+        if (Vector3.Distance(transform.position, player.transform.position) < distanceToAttack)
         {
-            if (seriousFight)
+            if (Time.time - lastAttack > lastAttackCooldown)
             {
-                lastAttackCooldown = Random.Range(attackCooldownStart, attackCooldownEnd);
-            }
+                if (seriousFight)
+                {
+                    lastAttackCooldown = Random.Range(attackCooldownStart, attackCooldownEnd);
+                }
 
-            else
-            {
-                lastAttackCooldown = attackCooldown;
-            }
+                else
+                {
+                    lastAttackCooldown = attackCooldown;
+                }
 
-            lastAttack = Time.time;
-            Object instantiated = Instantiate(attackObject, attackSpawner.transform.position, transform.rotation);
-            GetComponent<AudioSource>().Play();
-            Destroy(instantiated, 3);
+                lastAttack = Time.time;
+                Object instantiated = Instantiate(attackObject, attackSpawner.transform.position, transform.rotation);
+                GetComponent<AudioSource>().Play();
+                Destroy(instantiated, 3);
+            }
         }
+
     }
 
     void Die()

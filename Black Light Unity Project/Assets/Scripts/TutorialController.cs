@@ -131,7 +131,7 @@ public class TutorialController : Interactive
             yield return new WaitForSeconds(1);
 
             //Starts talking, then leave it to the player to continue
-            currentLine = "Hey there. This is a demo that serves as a proof of concept for certain game mechanics. I, Blue P., will be your guide.";
+            currentLine = "Hey there!|1| This is a demo that serves as a proof of concept for certain game mechanics.|1| I,|0.2| Blue P.,|0.2| will be your guide.";
             //GameObject.Find("Player").GetComponent<PlayerController>().SetInteractivity(false);
             yield return StartCoroutine(Talk());
             yield break;
@@ -226,7 +226,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 2)
         {
-            currentLine = "Good! Now you know you can interact with certain objects by pressing F. Follow me outside.";
+            currentLine = "Good!|0.5| Now you know you can interact with certain objects by pressing F.|0.5| Follow me outside.";
             currentEvent++;
         }
 
@@ -239,7 +239,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 4)
         {
-            currentLine = "Beautiful, huh? Well lit and flat, perfect for practice. Here, you can track your health using this.";
+            currentLine = "Beautiful, huh?|0.3| Well lit and flat,|0.2| perfect for practice.|0.7| Here, you can track your health using this.";
             currentEvent++;
         }
 
@@ -251,7 +251,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 6)
         {
-            currentLine = "There. Now, time for the main event: Fighting mechanics. You can call me Blue, by the way.";
+            currentLine = "There.|0.5| Now, time for the main event:|0.3| Fighting mechanics.";
             currentEvent++;
         }
 
@@ -292,7 +292,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 12)
         {
-            currentLine = "You're done? Okay. I'll take back the dummy and we'll move on to the next step: real combat.";
+            currentLine = "You're done? Okay.|0.5| I'll take back the dummy and we'll move on to the next step.";
             dummy.SetActive(false);
             currentEvent++;
         }
@@ -300,13 +300,13 @@ public class TutorialController : Interactive
         else if (currentEvent == 13)
         {
             lastCheckpoint = currentEvent;
-            currentLine = "Done. Welp, now you know how to hit stuff. Don't you want an opportunity to do it against something a little more <i>challenging</i> this time?";
+            currentLine = "Done. Welp,|0.2| the next step is real combat.|0.4| Don't you want an opportunity to do it against something a little more challenging this time?";
             currentEvent++;
         }
 
         else if (currentEvent == 14)
         {
-            currentLine = "I'll create a basic enemy for you. Should be easy enough.";
+            currentLine = "I'll create a basic enemy for you.|0.4| Should be easy enough.";
             GameObject.Find("Player").GetComponent<PlayerController>().DisplayWarning("Finishing this conversation will spawn an enemy");
             currentEvent++;
         }
@@ -328,7 +328,7 @@ public class TutorialController : Interactive
             if (!firstEnemy)
             {
                 GameObject.Find("Player").GetComponent<PlayerController>().ReplenishHealth();
-                currentLine = "Easy, right? Did you notice how difficult it gets to dodge its attacks when as you approach him, though?";
+                currentLine = "Easy, right?|1| Did you notice how difficult it gets to dodge its attacks when as you approach him, though?";
                 currentEvent = 18;
             }
 

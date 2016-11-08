@@ -196,6 +196,8 @@ public class PlayerController : MonoBehaviour
 
     private bool shouldSkipText;
 
+   // private bool canSkipText;
+
     //--------------------------------------------------------------------------------------------------------------
     //Functions
     //--------------------------------------------------------------------------------------------------------------
@@ -227,6 +229,7 @@ public class PlayerController : MonoBehaviour
         crosshairSuccess = GameObject.Find("Crosshair_Success").GetComponent<Image>();
         crosshairFail = GameObject.Find("Crosshair_Fail").GetComponent<Image>();
         pauseMenu = GameObject.Find("PauseMenu");
+       // canSkipText = true;
     }
 
     void Update()
@@ -243,7 +246,7 @@ public class PlayerController : MonoBehaviour
             if (dialogText.text == "")
             {
                 //Updates the ray casted onto the screen for various purposes
-                ray = new Ray(camera.transform.position, camera.transform.forward * attackRange);
+                ray = new Ray(camera.transform.position, camera.transform.forward * 2);
 
                 Physics.Raycast(ray.origin, ray.direction, out hit);
 
@@ -451,21 +454,21 @@ public class PlayerController : MonoBehaviour
         {
             lastAttack = Time.time;
 
-            if (hit.collider == null || hit.collider.tag != "Enemy")
-            {
-                crosshairFail.enabled = true;
-                attackFail.Play();
-                yield return new WaitForSeconds(0.2f);
-                crosshairFail.enabled = false;
-            }
-
-            else
+            if (hit.collider != null && hit.collider.tag == "Enemy" && hit.distance < attackRange)
             {
                 crosshairSuccess.enabled = true;
                 attackSuccess.Play();
                 hit.collider.gameObject.SendMessage("TakeDamage", attack);
                 yield return new WaitForSeconds(0.2f);
                 crosshairSuccess.enabled = false;
+            }
+
+            else
+            {
+                crosshairFail.enabled = true;
+                attackFail.Play();
+                yield return new WaitForSeconds(0.2f);
+                crosshairFail.enabled = false;
             }
         }
     }
@@ -746,17 +749,20 @@ public class PlayerController : MonoBehaviour
         //Separated by time
         string[] textGroup = textToIntroduce.Split('|');
 
-        char[] textInChar = textGroup[0].ToCharArray();
+        char[] textInChar = null;
         float counterForPlaying = 0.0f;
         bool shouldPlay = writingSoundEffect != null;
-
+        string finalText = "";
         for (int j = 0; j < textGroup.Length; j++)
         {
+            textInChar = textGroup[j].ToCharArray();
+
+            finalText += textGroup[j];
             for (int i = 0; i < textInChar.Length; i++)
             {
                 if (shouldSkipText)
                 {
-                    dialogText.text = textToIntroduce;
+                    dialogText.text = finalText;
                     shouldSkipText = false;
                     break;
                 }
@@ -773,6 +779,17 @@ public class PlayerController : MonoBehaviour
                 shouldPlay = counterForPlaying > timeBetweenPlays;
                 dialogText.text += textInChar[i];
                 yield return new WaitForSeconds(characterWriteDelay);
+            }
+            //Assumes that if there's a |, it closes and what's between it is a floating number which meaning is to
+            //wait for that many seconds before continuing the dialog.
+            if(j+1 < textGroup.Length)
+            {
+                //canSkipText = false;
+                yield return new WaitForSeconds(float.Parse(textGroup[j+1]));
+                shouldSkipText = false;
+                //Because the for loop does the other one
+                j = j + 1;
+                //writingSoundEffect.Play();
             }
         }
         introducingText = false;
