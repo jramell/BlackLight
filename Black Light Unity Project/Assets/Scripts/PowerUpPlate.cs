@@ -22,7 +22,7 @@ public class PowerUpPlate : MonoBehaviour
             {
                 col.gameObject.GetComponent<PlayerController>().GetComponent<PlayerController>().ReceivePowerUp(type);
                 gameObject.GetComponent<AudioSource>().Play();
-                used = true;
+                //used = true;
                // Destroy(gameObject, gameObject.GetComponent<AudioSource>().clip.length);
             }
         }

@@ -33,9 +33,11 @@ public class PlayerController : MonoBehaviour
     ///Dash cooldown
     public float dashCooldown;
 
-    public float lateralDashForce;
+    //public float lateralDashForce;
 
-    public float forwardDashForce;
+    public float dashForce;
+
+    //public float forwardDashForce;
 
     //Maximum dash stacks 
     public int dashMaxStacks;
@@ -158,9 +160,11 @@ public class PlayerController : MonoBehaviour
     //Is the player losing speed stacks right now?
     private bool losingSpeedStacks;
 
-    private float baseForwardDashForce;
+    //private float baseForwardDashForce;
 
-    private float baseLateralDashForce;
+    private float baseDashForce;
+
+    //private float baseLateralDashForce;
 
     //Sound effect played at death
     private AudioSource deathSound;
@@ -199,6 +203,11 @@ public class PlayerController : MonoBehaviour
 
     private bool shouldSkipText;
 
+    //Number of attacks the player has received while invulnerable
+    private static int blockedAttacks;
+
+    //Traslation vector, updated each frame
+    private Vector3 translate;
    // private bool canSkipText;
 
     //--------------------------------------------------------------------------------------------------------------
@@ -215,13 +224,14 @@ public class PlayerController : MonoBehaviour
         movementEnabled = true;
         cameraMovementEnabled = true;
         maxHealthPoints = healthPoints;
-        baseForwardDashForce = forwardDashForce;
-        baseLateralDashForce = lateralDashForce;
+        //    baseForwardDashForce = forwardDashForce;
+        //  baseLateralDashForce = lateralDashForce;
+        baseDashForce = dashForce;
         losingSpeedStacks = false;
         baseSpeed = speed;
         speedPowerUpStacks = 0;
         isPaused = false;
-        dashStackAmount = 0;
+        //dashStackAmount = 0;
         isChargingStacks = false;
         isDead = false;
         rigidbody = GetComponent<Rigidbody>();
@@ -256,7 +266,7 @@ public class PlayerController : MonoBehaviour
                 if (movementEnabled)
                 {
                     //Moves the player
-                    Vector3 translate = new Vector3(Input.GetAxis("Horizontal") * speed * Time.deltaTime, 0,
+                    translate = new Vector3(Input.GetAxis("Horizontal") * speed * Time.deltaTime, 0,
                                         Input.GetAxis("Vertical") * speed * Time.deltaTime);
                     transform.Translate(translate);
 
@@ -438,6 +448,8 @@ public class PlayerController : MonoBehaviour
         //Updates time counter every 1/100 of a second, and because floating point numbers can't be 
         //compared to maximum precision, this means it will take at most an extra 1/100 of a second
         //charging 
+
+        Debug.Log("dash stacks }while charging: " + dashStackAmount);
         float accumulatedStackChargingTime = 0.0f;
         isChargingStacks = true;
 
@@ -524,8 +536,18 @@ public class PlayerController : MonoBehaviour
                     Die();
                 }
             }
+
+            else
+            {
+                blockedAttacks++;
+            }
         }
         return ans;
+    }
+
+    public int GetBlockedAttacks()
+    {
+        return blockedAttacks;
     }
 
     //Adds the value passed as a parameter to the current health
@@ -592,30 +614,36 @@ public class PlayerController : MonoBehaviour
         deathUI.SetActive(false);
     }
 
+    //This tipe of dash uses instantenous stop rather tan deceleration. Feels weird, so not using it
+
+    //IEnumerator DashCor()
+    //{
+    //    float effect = 1 + speedStackEffect * speedPowerUpStacks;
+    //    speed *= 3f;
+    //    updateDashInfo();
+    //    yield return new WaitForSeconds(0.5f);
+    //    if(speedPowerUpStacks > 0)
+    //    {
+    //    speed = baseSpeed * speedPowerUpStacks * effect;
+    //    }
+    //    else
+    //    {
+    //        speed = baseSpeed;
+    //    }
+    //}
+
     void Dash()
     {
         if (canDash())
         {
-            if (Input.GetKey(KeyCode.Q))
+            if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.R))
             {
-                //Dash left
-                rigidbody.AddRelativeForce(new Vector3(-lateralDashForce, 0, 0), ForceMode.VelocityChange);
+                //StartCoroutine(DashCor());
+                rigidbody.AddRelativeForce(translate.normalized * dashForce, ForceMode.VelocityChange);
+                Debug.Log("dash magnitude: " + (translate.normalized * dashForce).magnitude);
                 updateDashInfo();
             }
 
-            else if (Input.GetKey(KeyCode.E))
-            {
-                //Dash to right
-                rigidbody.AddRelativeForce(new Vector3(lateralDashForce, 0, 0), ForceMode.VelocityChange);
-                updateDashInfo();
-            }
-
-            else if (Input.GetKey(KeyCode.R) || Input.GetMouseButton(2))
-            {
-                //Dash forward
-                rigidbody.AddRelativeForce(new Vector3(0, 0, forwardDashForce), ForceMode.VelocityChange);
-                updateDashInfo();
-            }
         }
     }
 
@@ -704,8 +732,11 @@ public class PlayerController : MonoBehaviour
         speed = baseSpeed * effect;
 
         //Modify dash force in the same way speed is
-        forwardDashForce = baseForwardDashForce * effect;
-        lateralDashForce = baseLateralDashForce * effect;
+        //forwardDashForce = baseForwardDashForce * effect;
+        //lateralDashForce = baseLateralDashForce * effect;
+
+        //Speed already included in dash force
+        //dashForce = baseDashForce * effect;
         speedStackText.text = speedPowerUpStacks.ToString();
 
         //Resets 
@@ -841,7 +872,7 @@ public class PlayerController : MonoBehaviour
         dialogText.text = "";
     }
 
-    void FinishConversation()
+    public void FinishConversation()
     {
         dialogText.text = "";
         objectTalkingTo = null;
@@ -877,5 +908,11 @@ public class PlayerController : MonoBehaviour
     public void EnableInteraction()
     {
         canInteract = true;
+    }
+
+    public void SetDashStacks(int newDashes)
+    {
+        dashStackAmount = newDashes;
+        updateDashGraphicalInfo();
     }
 }
