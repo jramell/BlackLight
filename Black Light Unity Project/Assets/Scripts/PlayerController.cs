@@ -358,12 +358,13 @@ public class PlayerController : MonoBehaviour
                 CleanInteractionText();
             }
 
-            //Get input for pause
-            if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                Pause();
-            }
+        }
 
+
+        //Get input for pause
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Pause();
         }
 
         //Receive input for retry
@@ -661,18 +662,22 @@ public class PlayerController : MonoBehaviour
 
     void Pause()
     {
-        //Pauses if not paused, unpause if paused.
-        isPaused = !isPaused;
-        pauseMenu.SetActive(isPaused);
-
+        //Assumes this is the component that has the background music
+        
         if (isPaused)
         {
-            Time.timeScale = 0;
+            Time.timeScale = 1;
+            pauseMenu.SetActive(false);
+            isPaused = false;
+            GameObject.Find("BackgroundMusicContainer").GetComponent<AudioSource>().volume /= 0.3f;
         }
 
         else
         {
-            Time.timeScale = 1;
+            Time.timeScale = 0;
+            pauseMenu.SetActive(true);
+            isPaused = true;
+            GameObject.Find("BackgroundMusicContainer").GetComponent<AudioSource>().volume *= 0.3f;
         }
 
     }

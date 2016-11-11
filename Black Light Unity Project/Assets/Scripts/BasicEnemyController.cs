@@ -64,7 +64,8 @@ public class BasicEnemyController : MonoBehaviour
                 lastAttack = Time.time;
                 Object instantiated = Instantiate(attackObject, attackSpawner.transform.position, transform.rotation);
                 AudioSource audioCopy = GetComponent<AudioSource>();
-                audioCopy.pitch = Random.Range(0.7f, 1.3f);
+                audioCopy.pitch = Random.Range(0.8f, 1.2f);
+                audioCopy.Play();
                 Destroy(instantiated, 3);
             }
         }

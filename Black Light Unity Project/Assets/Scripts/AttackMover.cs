@@ -33,7 +33,7 @@ public class AttackMover : MonoBehaviour
             {
                 //Play a different sound when the player cannot take damage
             }
-                Destroy(gameObject);
+            Destroy(gameObject);
         }
 
         else

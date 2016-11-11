@@ -21,20 +21,14 @@ public class MenuController : MonoBehaviour
 
     void Start()
     {
-        StartCoroutine(ExtraSound());
+//        StartCoroutine(ExtraSound());
     }
 
     IEnumerator ExtraSound()
     {
         yield return StartCoroutine(Utils.WaitForSecondsRealtime(1.5f));
-
-        AudioSource[] audios = extraAudioContainer.GetComponents<AudioSource>();
-
-        for (int i = 0; i < audios.Length; i++)
-        {
-            audios[i].Play();
-            yield return StartCoroutine(Utils.WaitForSecondsRealtime(audios[i].clip.length));
-        }
+            GetComponent<AudioSource>().Play();
+            yield return StartCoroutine(Utils.WaitForSecondsRealtime(GetComponent<AudioSource>().clip.length));
     }
 
     //is executed when the button options is clicked
