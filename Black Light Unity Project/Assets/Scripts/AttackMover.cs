@@ -23,17 +23,20 @@ public class AttackMover : MonoBehaviour
 
     void OnTriggerEnter(Collider col)
     {
+        //Debug.Log("attack entered trigger");
         if (col.tag == "Player")
         {
-            if (GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>().TakeDamage(damage))
+            if (col.gameObject.GetComponent<PlayerController>().TakeDamage(damage))
             {
                 //Play a certain sound
             }
+
             else
             {
-                //Play a different sound when the player cannot take damage
+                GetComponent<MeshRenderer>().enabled = false;
+                transform.Find("particles").GetComponent<ParticleSystem>().Play();
             }
-            Destroy(gameObject);
+            Destroy(gameObject, 0.5f);
         }
 
         else

@@ -75,7 +75,7 @@ public class TutorialController : Interactive
 
     void Start()
     {
-        currentEvent = 1002;
+        currentEvent = 14;
         shouldMove = false;
         StartCoroutine(ManageEvents());
         writingSoundEffect = GameObject.Find("Baroth").GetComponent<AudioSource>();
@@ -124,6 +124,11 @@ public class TutorialController : Interactive
                 currentEvent = 30;
             }
         }
+    }
+
+    public static void SetCurrentEvent(int current)
+    {
+        currentEvent = current;
     }
 
     IEnumerator ManageEvents()
@@ -208,12 +213,13 @@ public class TutorialController : Interactive
         {
             GameObject.Find("Player").GetComponent<PlayerController>().SetDashStacks(3);
             GameObject.Find("Player").GetComponent<PlayerController>().DisableInteraction();
+            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("");
             currentEvent = 21;
             Vector3 initialScale = dashUI.transform.localScale;
             Vector3 tempScale = new Vector3(3f, 4, 1);
             RectTransform dashUIRect = dashUI.GetComponent<RectTransform>();
             Vector3 initialPosition = dashUIRect.localPosition;
-            Vector3 tempPosition = new Vector3(500, -450, 0);
+            Vector3 tempPosition = new Vector3(600, -450, 0);
             dashUIRect.localScale = tempScale;
             dashUIRect.localPosition = tempPosition;
             dashUI.SetActive(true);
@@ -239,7 +245,7 @@ public class TutorialController : Interactive
             }
 
             sfxContainer.GetComponents<AudioSource>()[0].Play();
-            currentEvent = 21;
+            //currentEvent = 21;
             GameObject.Find("Player").GetComponent<PlayerController>().EnableInteraction();
 
         }
@@ -324,7 +330,7 @@ public class TutorialController : Interactive
 
         if (currentEvent == 20)
         {
-            yield return new WaitForSeconds(6);
+            yield return new WaitForSeconds(8);
             if (currentEvent == 1001)
             {
                 //If the player hasn't understood that he presses F to forward conversations and takes too long to forward
@@ -456,13 +462,13 @@ public class TutorialController : Interactive
             if (!firstEnemy)
             {
                 GameObject.Find("Player").GetComponent<PlayerController>().ReplenishHealth();
-                currentLine = "That's right.|0.5| But,|0.3| as you approached him his attacks got more difficult to dodge, didn't they?";
+                currentLine = "That's right.|0.5| Now:|0.2| dashing.";
                 currentEvent = 18;
             }
 
             else
             {
-                currentLine = "Reading this doesn't seem like the best use of your time.";
+                currentLine = "There he is.";
                 currentEvent++;
             }
         }
@@ -475,7 +481,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 18)
         {
-            currentLine = "Well, there's a way to avoid taking damage when close.|0.3| You dash.";
+            currentLine = "You become <b>invulnerable</b> for a short time after dashing, so you can use it to avoid damage.";
             currentEvent++;
         }
 
@@ -501,7 +507,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 21)
         {
-            currentLine = "Also, you become <b>invulnerable</b> for a short time after dashing.";
+            currentLine = "I'll spawn another basic enemy for you so you can practice.";
             GameObject.Find("Player").GetComponent<PlayerController>().DisplayWarning("Finishing the conversation will spawn an enemy");
 
             currentEvent = 1002 ;
@@ -509,7 +515,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 1002)
         {
-            currentLine = "I'll spawn another enemy for you.|0.3| Use your invulnerability to go <b>through</b> one of his attacks!";
+            currentLine = "Use your invulnerability to go <b>through</b> one of his attacks!";
             currentEvent = 22;
         }
 

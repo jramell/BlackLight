@@ -77,6 +77,11 @@ public class SceneLoader : MonoBehaviour
         SceneManager.LoadScene("Terrain");
     }
 
+    public static void LoadMainMenu()
+    {
+        SceneManager.LoadScene("TitleScreen");
+    }
+
     public static void LoadSceneWithName(string sceneToLoad)
     {
         SceneManager.LoadScene(sceneToLoad);

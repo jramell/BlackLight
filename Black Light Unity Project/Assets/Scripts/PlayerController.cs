@@ -90,6 +90,11 @@ public class PlayerController : MonoBehaviour
     public Text tutorialText;
 
     public GameObject deathUI;
+
+    public GameObject dashInvulnerabilityEffect;
+
+    public GameObject sfxContainer;
+
     //--------------------------------------------------------------------------------------------------------------
     //Private variables
     //--------------------------------------------------------------------------------------------------------------
@@ -208,7 +213,7 @@ public class PlayerController : MonoBehaviour
 
     //Traslation vector, updated each frame
     private Vector3 translate;
-   // private bool canSkipText;
+    // private bool canSkipText;
 
     //--------------------------------------------------------------------------------------------------------------
     //Functions
@@ -242,7 +247,7 @@ public class PlayerController : MonoBehaviour
         crosshairSuccess = GameObject.Find("Crosshair_Success").GetComponent<Image>();
         crosshairFail = GameObject.Find("Crosshair_Fail").GetComponent<Image>();
         //pauseMenu = GameObject.Find("PauseMenu");
-       // canSkipText = true;
+        // canSkipText = true;
     }
 
     void Update()
@@ -375,6 +380,11 @@ public class PlayerController : MonoBehaviour
                 Retry();
             }
         }
+    }
+
+    public void Reset()
+    {
+        TutorialController.SetCurrentEvent(0);
     }
 
     // Should stacks be charging?
@@ -522,10 +532,9 @@ public class PlayerController : MonoBehaviour
     //Should be called everytime the player takes damage
     public bool TakeDamage(int damage)
     {
-        bool ans = IsInvulnerable();
         if (!isDead)
         {
-            if (!ans)
+            if (!IsInvulnerable())
             {
                 StartCoroutine(DisplayDamageEffect());
 
@@ -536,14 +545,17 @@ public class PlayerController : MonoBehaviour
                 {
                     Die();
                 }
+
+                return true;
             }
 
             else
             {
                 blockedAttacks++;
+                return false;
             }
         }
-        return ans;
+        return false;
     }
 
     public int GetBlockedAttacks()
@@ -554,7 +566,7 @@ public class PlayerController : MonoBehaviour
     //Adds the value passed as a parameter to the current health
     void ModifyHealth(int modifyValue)
     {
-        
+
         healthPoints += modifyValue;
         healthPoints = Mathf.Clamp(healthPoints, 0, maxHealthPoints);
         StartCoroutine(smoothHealthUpdate());
@@ -569,7 +581,7 @@ public class PlayerController : MonoBehaviour
         if (healthBar.fillAmount < targetFillAmount)
         {
             rateOfChange = rateOfChange * -1;
-            while(healthBar.fillAmount < targetFillAmount)
+            while (healthBar.fillAmount < targetFillAmount)
             {
                 healthBar.fillAmount += rateOfChange;
                 yield return new WaitForSeconds(0.01f);
@@ -578,7 +590,7 @@ public class PlayerController : MonoBehaviour
 
         else
         {
-            while(healthBar.fillAmount > targetFillAmount)
+            while (healthBar.fillAmount > targetFillAmount)
             {
                 healthBar.fillAmount -= rateOfChange;
                 yield return new WaitForSeconds(0.01f);
@@ -640,12 +652,51 @@ public class PlayerController : MonoBehaviour
             if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.R))
             {
                 //StartCoroutine(DashCor());
-                rigidbody.AddRelativeForce(translate.normalized * dashForce, ForceMode.VelocityChange);
-                Debug.Log("dash magnitude: " + (translate.normalized * dashForce).magnitude);
+                if (translate != Vector3.zero)
+                {
+                    rigidbody.AddRelativeForce(translate.normalized * dashForce, ForceMode.VelocityChange);
+                }
+                else
+                {
+                    rigidbody.AddRelativeForce(new Vector3(0, 0, dashForce), ForceMode.VelocityChange);
+                }
                 updateDashInfo();
+                //sfxContainer.GetComponents<AudioSource>()[2].Play();
+                StartCoroutine(FadeIntoInvulnerability());
             }
-
         }
+    }
+
+    IEnumerator FadeIntoInvulnerability()
+    {
+        //Debug.Log("was invulnerable at start: " + IsInvulnerable());
+        Image dashImage = dashInvulnerabilityEffect.GetComponent<Image>();
+        Color targetColor = dashImage.color;
+        Color tempColor = targetColor;
+        tempColor.a = 0;
+        dashImage.color = tempColor;
+        dashInvulnerabilityEffect.SetActive(true);
+        while (tempColor != targetColor)
+        {
+            tempColor.a += 0.1f * targetColor.a;
+            dashImage.color = tempColor;
+            yield return new WaitForSeconds(0.01f);
+        }
+        yield return new WaitForSeconds(dashInvulnerabilityTime - 0.16f);
+
+        //Fade out in 0.05 secs
+        Color originalColor = tempColor;
+        targetColor.a = 0;
+        float difference = tempColor.a;
+        while (tempColor != targetColor)
+        {
+            tempColor.a -= difference * 0.2f;
+            dashImage.color = tempColor;
+            yield return new WaitForSeconds(0.01f);
+        }
+        dashInvulnerabilityEffect.SetActive(false);
+        dashImage.color = originalColor;
+        //Debug.Log("was invulnerable at end: " + IsInvulnerable());
     }
 
     void updateDashInfo()
@@ -660,16 +711,19 @@ public class PlayerController : MonoBehaviour
         dashNumberText.text = dashStackAmount.ToString();
     }
 
-    void Pause()
+    public void Pause()
     {
         //Assumes this is the component that has the background music
-        
+        GameObject bgMusic = GameObject.Find("BackgroundMusicContainer");
         if (isPaused)
         {
             Time.timeScale = 1;
             pauseMenu.SetActive(false);
             isPaused = false;
-            GameObject.Find("BackgroundMusicContainer").GetComponent<AudioSource>().volume /= 0.3f;
+            if (bgMusic != null)
+            {
+                bgMusic.GetComponent<AudioSource>().volume /= 0.3f;
+            }
         }
 
         else
@@ -677,9 +731,12 @@ public class PlayerController : MonoBehaviour
             Time.timeScale = 0;
             pauseMenu.SetActive(true);
             isPaused = true;
-            GameObject.Find("BackgroundMusicContainer").GetComponent<AudioSource>().volume *= 0.3f;
-        }
 
+            if (bgMusic != null)
+            {
+                bgMusic.GetComponent<AudioSource>().volume *= 0.3f;
+            }
+        }
     }
 
     bool canDash()
@@ -854,17 +911,17 @@ public class PlayerController : MonoBehaviour
             }
             //Assumes that if there's a |, it closes and what's between it is a floating number which meaning is to
             //wait for that many seconds before continuing the dialog.
-            if(j+1 < textGroup.Length)
+            if (j + 1 < textGroup.Length)
             {
                 //canSkipText = false;
-                yield return new WaitForSeconds(float.Parse(textGroup[j+1]));
+                yield return new WaitForSeconds(float.Parse(textGroup[j + 1]));
                 shouldSkipText = false;
                 //Because the for loop does the other one
                 j = j + 1;
                 //writingSoundEffect.Play();
             }
+            introducingText = false;
         }
-        introducingText = false;
     }
 
     void ContinueConversation()

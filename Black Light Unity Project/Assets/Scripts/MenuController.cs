@@ -38,6 +38,18 @@ public class MenuController : MonoBehaviour
         optionsUI.SetActive(true);
     }
 
+    public void OnContinueClick()
+    {
+        GameObject.Find("Player").GetComponent<PlayerController>().Pause();
+    }
+
+    public void OnReturnToMainMenuClick()
+    {
+        GameObject.Find("Player").GetComponent<PlayerController>().Reset();
+        SceneLoader.LoadMainMenu();
+        Time.timeScale = 1;
+    }
+
     public void IncreaseSensitivity()
     {
         GameObject.Find("Player").SendMessage("IncreaseSensitivity");
