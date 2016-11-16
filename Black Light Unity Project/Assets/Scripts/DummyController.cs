@@ -12,7 +12,7 @@ public class DummyController : MonoBehaviour {
     {
         if (!punched)
         {
-            GameObject.Find("Baroth").GetComponent<TutorialController>().RegisterDummyPunch();
+            GameObject.Find("BlueP").GetComponent<TutorialController>().RegisterDummyPunch();
             punched = true;
         }
     }

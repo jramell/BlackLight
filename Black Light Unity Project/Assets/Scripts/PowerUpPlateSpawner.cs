@@ -6,19 +6,19 @@ public class PowerUpPlateSpawner : MonoBehaviour
 
     public GameObject powerUpPlatePrefab;
 
-    private bool spawned;
+    //private bool spawned;
 
     void Start()
     {
-        spawned = false;
+       // spawned = false;
     }
 
-    public void SpawnPowerUpPlate()
+    public void SpawnPowerUpPlate(bool spawn)
     {
-        if (!spawned)
-        {
-            Instantiate(powerUpPlatePrefab, transform.position, Quaternion.identity);
-            spawned = true;
-        }
+     //   if (spawn)
+        //{
+            transform.FindChild("PowerUpPlate").gameObject.SetActive(spawn);
+            //spawned = true;
+        //}
     }
 }

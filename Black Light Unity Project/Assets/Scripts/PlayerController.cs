@@ -91,6 +91,8 @@ public class PlayerController : MonoBehaviour
 
     public GameObject deathUI;
 
+    public GameObject crosshair;
+
     public GameObject dashInvulnerabilityEffect;
 
     public GameObject sfxContainer;
@@ -337,9 +339,18 @@ public class PlayerController : MonoBehaviour
                     StartCoroutine(ChargeStacks());
                 }
 
-                if (Input.GetKeyDown(KeyCode.LeftShift))
+                if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetMouseButton(2))
                 {
-                    StartCoroutine(ActivateEnergyVission());
+                    Debug.Log("visor effect active: " + visorEffect.activeSelf);
+                    if(!visorEffect.activeSelf)
+                    {
+                        StartCoroutine(ActivateEnergyVission());
+                    }
+                    else
+                    {
+                        ActivateVission(false);
+                        visorEffect.SetActive(false);
+                    }
                 }
             }
 
@@ -414,14 +425,14 @@ public class PlayerController : MonoBehaviour
 
         bool done = false;
         //If the player stops pressing X, the energy vission stops activating
-        while (Input.GetKey(KeyCode.LeftShift) && !done)
+        while (Input.GetKey(KeyCode.LeftControl) && !done)
         {
             yield return new WaitForSeconds(0.01f);
             timeShiftHasBeenPressed += 0.01f;
             done = timeShiftHasBeenPressed > timeToActivateVission;
             //Percentage of the time that has charged is translated to alpha percentage and then assigned to the effect
             //The 0.5f at the end is so the maximum alpha to be achieved before activation is 50% the original
-            tempColor.a = (timeShiftHasBeenPressed / timeToActivateVission) * originalAlpha * 0.5f;
+            tempColor.a = (timeShiftHasBeenPressed / timeToActivateVission) * originalAlpha * 0.8f;
             visorEffect.GetComponent<Image>().color = tempColor;
         }
 
@@ -429,15 +440,19 @@ public class PlayerController : MonoBehaviour
         {
             tempColor.a = originalAlpha;
             visorEffect.GetComponent<Image>().color = tempColor;
-            ActivateVission();
+            ActivateVission(true);
             visorEffect.GetComponent<AudioSource>().Play();
             yield return new WaitForSeconds(0.2f);
         }
 
+        else
+        {
         visorEffect.SetActive(false);
+        }
+
     }
 
-    void ActivateVission()
+    void ActivateVission(bool activate)
     {
         //Identify GameObjects with Physics.OverlapSphere to identify colliders
         Collider[] colliders = Physics.OverlapSphere(transform.position, vissionRadius);
@@ -449,7 +464,7 @@ public class PlayerController : MonoBehaviour
             if (colliders[i].gameObject.tag == "PowerUpPlate_Spawn")
             {
                 //Spawns PowerUpPlates where spawners are
-                colliders[i].gameObject.GetComponent<PowerUpPlateSpawner>().SpawnPowerUpPlate();
+                colliders[i].gameObject.GetComponent<PowerUpPlateSpawner>().SpawnPowerUpPlate(activate);
             }
         }
     }
@@ -460,7 +475,7 @@ public class PlayerController : MonoBehaviour
         //compared to maximum precision, this means it will take at most an extra 1/100 of a second
         //charging 
 
-        Debug.Log("dash stacks }while charging: " + dashStackAmount);
+        Debug.Log("dash stacks while charging: " + dashStackAmount);
         float accumulatedStackChargingTime = 0.0f;
         isChargingStacks = true;
 
@@ -649,7 +664,8 @@ public class PlayerController : MonoBehaviour
     {
         if (canDash())
         {
-            if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.R))
+           // if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.R))
+           if(Input.GetKeyDown(KeyCode.LeftShift) || Input.GetMouseButtonDown(1))
             {
                 //StartCoroutine(DashCor());
                 if (translate != Vector3.zero)
@@ -661,7 +677,6 @@ public class PlayerController : MonoBehaviour
                     rigidbody.AddRelativeForce(new Vector3(0, 0, dashForce), ForceMode.VelocityChange);
                 }
                 updateDashInfo();
-                //sfxContainer.GetComponents<AudioSource>()[2].Play();
                 StartCoroutine(FadeIntoInvulnerability());
             }
         }
@@ -676,6 +691,9 @@ public class PlayerController : MonoBehaviour
         tempColor.a = 0;
         dashImage.color = tempColor;
         dashInvulnerabilityEffect.SetActive(true);
+        AudioSource audioCopy = dashInvulnerabilityEffect.GetComponent<AudioSource>();
+        audioCopy.pitch = Random.Range(0.95f, 1.05f);
+        audioCopy.Play();
         while (tempColor != targetColor)
         {
             tempColor.a += 0.1f * targetColor.a;
@@ -718,6 +736,7 @@ public class PlayerController : MonoBehaviour
         if (isPaused)
         {
             Time.timeScale = 1;
+            Cursor.visible = false;
             pauseMenu.SetActive(false);
             isPaused = false;
             if (bgMusic != null)
@@ -731,7 +750,7 @@ public class PlayerController : MonoBehaviour
             Time.timeScale = 0;
             pauseMenu.SetActive(true);
             isPaused = true;
-
+            Cursor.visible = true;
             if (bgMusic != null)
             {
                 bgMusic.GetComponent<AudioSource>().volume *= 0.3f;
@@ -819,7 +838,7 @@ public class PlayerController : MonoBehaviour
 
         else
         {
-            speedStackBackground.SetActive(false);
+            //speedStackBackground.SetActive(false);
         }
     }
 
@@ -871,8 +890,11 @@ public class PlayerController : MonoBehaviour
     {
         //Waiting time added because when it is not there, sometimes dialog would just appear as if textWriteDelay was 0
         yield return new WaitForSeconds(0.01f);
+        //Debug.Log("parameter passed by npc: " + talkingWith);
         objectTalkingTo = talkingWith;
         introducingText = true;
+        crosshair.SetActive(false);
+        DisableInteraction();
         ClearText();
 
         //Separated by time
@@ -885,10 +907,32 @@ public class PlayerController : MonoBehaviour
         for (int j = 0; j < textGroup.Length; j++)
         {
             textInChar = textGroup[j].ToCharArray();
-
+            string buffer = "";
             finalText += textGroup[j];
             for (int i = 0; i < textInChar.Length; i++)
             {
+                //Debug.Log("iteration: " + i + " .. buffer: " + buffer);
+				if (buffer != "" && buffer.ToCharArray()[0] == '@')
+                {
+                    if(textInChar[i] == '@')
+                    {
+                        dialogText.text += buffer.Substring(1, (buffer.Length - 1));
+                        buffer = "";
+                        yield return new WaitForSeconds(characterWriteDelay);
+                        continue;
+                    }
+
+                    //implicit else
+                        buffer += textInChar[i];
+                        continue;
+                }
+
+                if(textInChar[i] == '@')
+                {
+                    buffer += textInChar[i];
+                    continue;
+                }
+
                 if (shouldSkipText)
                 {
                     dialogText.text = finalText;
@@ -899,13 +943,15 @@ public class PlayerController : MonoBehaviour
                 if (shouldPlay)
                 {
                     writingSoundEffect.Play();
+                    shouldPlay = false;
                 }
 
-                else
-                {
-                    counterForPlaying += characterWriteDelay;
-                }
-                shouldPlay = counterForPlaying > timeBetweenPlays;
+                //else
+                //{
+                 //   counterForPlaying += characterWriteDelay;
+                //}
+                
+               // shouldPlay = counterForPlaying > timeBetweenPlays;
                 dialogText.text += textInChar[i];
                 yield return new WaitForSeconds(characterWriteDelay);
             }
@@ -920,8 +966,9 @@ public class PlayerController : MonoBehaviour
                 j = j + 1;
                 //writingSoundEffect.Play();
             }
-            introducingText = false;
         }
+        introducingText = false;
+        EnableInteraction();
     }
 
     void ContinueConversation()
@@ -938,6 +985,7 @@ public class PlayerController : MonoBehaviour
     {
         dialogText.text = "";
         objectTalkingTo = null;
+        crosshair.SetActive(true);
     }
 
     public void SetTutorialText(string newText)

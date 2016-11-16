@@ -29,11 +29,8 @@ public class SceneLoader : MonoBehaviour
 
     private IEnumerator FadeIn()
     {
-        yield return new WaitForSeconds(1);
         backgroundMusic.Play();
-        yield return new WaitForSeconds(3);
-        StartCoroutine(Loop());
-
+        yield return new WaitForSeconds(1.5f);
         Color tempColorTitle = title.color;
         float rateOfFade = 1 / timeOfTitleFade * 0.01f;
         while (title.color.a < 1)
@@ -58,14 +55,14 @@ public class SceneLoader : MonoBehaviour
         }
     }
 
-    private IEnumerator Loop()
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(backgroundMusic.clip.length + 4);
-            backgroundMusic.Play();
-        }
-    }
+    //private IEnumerator Loop()
+    //{
+    //    while (true)
+    //    {
+    //        yield return new WaitForSeconds(backgroundMusic.clip.length + 3);
+    //        backgroundMusic.Play();
+    //    }
+    //}
 
     public void LoadDemo()
     {

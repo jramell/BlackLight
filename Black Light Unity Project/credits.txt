@@ -10,8 +10,9 @@ SFX: http://www.freesound.org/people/TicTacShutUp/sounds/409/
 SFX: http://www.freesound.org/people/Fantozzi/packs/10338/?page=2#sound
 SFX: http://freesound.org/people/original_sound/sounds/364660/
 SFX: https://www.freesound.org/people/Goup_1/sounds/195396/
-SFX: http://soundbible.com/1744-Shooting-Star.html
 SFX: http://www.freesound.org/people/Diboz/sounds/211494/ modified
+SFX: http://freesound.org/people/Nic3_one/sounds/166554/ modified
+SFX: http://www.freesfx.co.uk/rx2/mp3s/3/15679_1460481878.mp3 from http://www.freesfx.co.uk/
 
 
 Special Thanks: Miguelangel Madera
