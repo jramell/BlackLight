@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using UnityStandardAssets.ImageEffects;
 
 public class PlayerController : MonoBehaviour
 {
@@ -67,6 +68,13 @@ public class PlayerController : MonoBehaviour
     //The time it takes for health to smooth into its new fill amount
     public float healthUpdateTime;
 
+
+    public float contrastInBattleMode;
+
+    public float maxFieldOfView;
+
+    public float fieldOfViewAugment;
+
     //Health bar foreground to be depleted when damage is taken
     public Image healthBar;
 
@@ -97,10 +105,12 @@ public class PlayerController : MonoBehaviour
 
     public GameObject sfxContainer;
 
+
     //--------------------------------------------------------------------------------------------------------------
     //Private variables
     //--------------------------------------------------------------------------------------------------------------
 
+    private bool isVisorOn;
     //Player's speed without modifiers
     private float baseSpeed;
 
@@ -210,16 +220,53 @@ public class PlayerController : MonoBehaviour
 
     private bool shouldSkipText;
 
-    //Number of attacks the player has received while invulnerable
-    private static int blockedAttacks;
+
 
     //Traslation vector, updated each frame
     private Vector3 translate;
     // private bool canSkipText;
+    private ContrastEnhance contrastEnhance;
+
+    private float baseDashChargingTime;
+
+    private float baseFieldOfView;
+
+    //--------------------------------------------------------------------------------------------------------------
+    //Unity Analytics / Statistics
+    //--------------------------------------------------------------------------------------------------------------
+
+        //Should Unity Analytics be active?
+    public const bool ANALYTICS_ACTIVE = false;
+
+    //Name of the event that is registered when the player talks to Blue after he spawns the dummy.
+    public const string PUNCH_DUMMY_EVENT_NAME = "Talk after dummy punch";
+
+    //Name of the event that is registed when the player kills the first basic enemy
+    public const string FIRST_ENEMY_KILL_EVENT_NAME = "First enemy kill";
+
+    //Name of the event that is registered when the game is quitted by the player
+    public const string QUIT_EVENT_NAME = "Quit game";
+
+    //Number of attacks the player has received while invulnerable
+    private static int blockedAttacks;
+
+    //Number of times the player punched the dummy
+    private static int timesDummyWasPunched;
+
+    //Amount of enemies the player has killed
+    private static int amountOfEnemiesKilled;
+
+    //Amount of times the player died
+    private static int amountOfTimesDied;
 
     //--------------------------------------------------------------------------------------------------------------
     //Functions
     //--------------------------------------------------------------------------------------------------------------
+
+    void Awake()
+    {
+        contrastEnhance = transform.Find("Main Camera").gameObject.GetComponent<ContrastEnhance>();
+    }
 
     void Start()
     {
@@ -233,6 +280,8 @@ public class PlayerController : MonoBehaviour
         maxHealthPoints = healthPoints;
         //    baseForwardDashForce = forwardDashForce;
         //  baseLateralDashForce = lateralDashForce;
+        baseDashChargingTime = dashStackChargingTime;
+      
         baseDashForce = dashForce;
         losingSpeedStacks = false;
         baseSpeed = speed;
@@ -246,10 +295,12 @@ public class PlayerController : MonoBehaviour
         attackSuccess = GetComponents<AudioSource>()[1];
         deathSound = GetComponents<AudioSource>()[2];
         camera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
+        baseFieldOfView = camera.fieldOfView;
         crosshairSuccess = GameObject.Find("Crosshair_Success").GetComponent<Image>();
         crosshairFail = GameObject.Find("Crosshair_Fail").GetComponent<Image>();
         //pauseMenu = GameObject.Find("PauseMenu");
         // canSkipText = true;
+
     }
 
     void Update()
@@ -341,15 +392,17 @@ public class PlayerController : MonoBehaviour
 
                 if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetMouseButton(2))
                 {
-                    Debug.Log("visor effect active: " + visorEffect.activeSelf);
-                    if(!visorEffect.activeSelf)
+                   Debug.Log("visor effect active: " + isVisorOn);
+                    if(!isVisorOn)
                     {
                         StartCoroutine(ActivateEnergyVission());
                     }
                     else
                     {
                         ActivateVission(false);
-                        visorEffect.SetActive(false);
+                        isVisorOn = false;
+                        contrastEnhance.intensity = 0;
+                        //visorEffect.SetActive(false);
                     }
                 }
             }
@@ -393,6 +446,20 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public static int GetAmountOfEnemiesKilled()
+    {
+        return amountOfEnemiesKilled;
+    }
+
+    public static void InformEnemyDeath()
+    {
+        amountOfEnemiesKilled++;
+        if(amountOfEnemiesKilled == 1)
+        {
+            AnalyticsUtils.InformFirstEnemyDeath();
+        }
+    }
+
     public void Reset()
     {
         TutorialController.SetCurrentEvent(0);
@@ -417,37 +484,57 @@ public class PlayerController : MonoBehaviour
     IEnumerator ActivateEnergyVission()
     {
         float timeShiftHasBeenPressed = 0.0f;
-        float originalAlpha = visorEffect.GetComponent<Image>().color.a;
-        Color tempColor = visorEffect.GetComponent<Image>().color;
-        tempColor.a = 0;
-        visorEffect.GetComponent<Image>().color = tempColor;
-        visorEffect.SetActive(true);
+        //float originalAlpha = visorEffect.GetComponent<Image>().color.a;
+        //Color tempColor = visorEffect.GetComponent<Image>().color;
+        //tempColor.a = 0;
+        //visorEffect.GetComponent<Image>().color = tempColor;
+        //visorEffect.SetActive(true);
 
         bool done = false;
-        //If the player stops pressing X, the energy vission stops activating
-        while (Input.GetKey(KeyCode.LeftControl) && !done)
+        ////If the player stops pressing X, the energy vission stops activating
+       while (Input.GetKey(KeyCode.LeftControl) && !done)
         {
             yield return new WaitForSeconds(0.01f);
             timeShiftHasBeenPressed += 0.01f;
             done = timeShiftHasBeenPressed > timeToActivateVission;
-            //Percentage of the time that has charged is translated to alpha percentage and then assigned to the effect
-            //The 0.5f at the end is so the maximum alpha to be achieved before activation is 50% the original
-            tempColor.a = (timeShiftHasBeenPressed / timeToActivateVission) * originalAlpha * 0.8f;
-            visorEffect.GetComponent<Image>().color = tempColor;
+            //    //Percentage of the time that has charged is translated to alpha percentage and then assigned to the effect
+            //    //The 0.5f at the end is so the maximum alpha to be achieved before activation is 50% the original
+            //    tempColor.a = (timeShiftHasBeenPressed / timeToActivateVission) * originalAlpha * 0.8f;
+            //    visorEffect.GetComponent<Image>().color = tempColor;
+            contrastEnhance.intensity = (timeShiftHasBeenPressed / timeToActivateVission) * (contrastInBattleMode + 5f);
+            Debug.Log("intensity: " + contrastEnhance.intensity);
         }
+
 
         if (done)
         {
-            tempColor.a = originalAlpha;
-            visorEffect.GetComponent<Image>().color = tempColor;
+            contrastEnhance.intensity = contrastInBattleMode + 2f;
+            //contrastEnhance.intensity = 0.1f;
+            sfxContainer.GetComponents<AudioSource>()[2].Play();
+            //tempColor.a = originalAlpha;
+            //visorEffect.GetComponent<Image>().color = tempColor;
             ActivateVission(true);
-            visorEffect.GetComponent<AudioSource>().Play();
+            
+            yield return new WaitForSeconds(0.2f);
+            Debug.Log("started with intensity " + contrastEnhance.intensity);
+            float rate = contrastEnhance.intensity - contrastInBattleMode;
+            while (contrastEnhance.intensity > contrastInBattleMode)
+            {
+                Debug.Log("passed with intensity " + contrastEnhance.intensity);
+                contrastEnhance.intensity -= rate * 0.05f;
+                yield return new WaitForSeconds(0.01f);
+            }
+            //contrastEnhance.intensity = 2.6f;
+            
+            isVisorOn = true;
             yield return new WaitForSeconds(0.2f);
         }
 
         else
         {
-        visorEffect.SetActive(false);
+            isVisorOn = false;
+            //visorEffect.SetActive(false);
+            contrastEnhance.intensity = 0;
         }
 
     }
@@ -467,6 +554,7 @@ public class PlayerController : MonoBehaviour
                 colliders[i].gameObject.GetComponent<PowerUpPlateSpawner>().SpawnPowerUpPlate(activate);
             }
         }
+       // contrastEnhance.intensity = contrastInBattleMode + 0.5f;
     }
 
     IEnumerator ChargeStacks()
@@ -542,6 +630,16 @@ public class PlayerController : MonoBehaviour
         audio.Play();
         yield return new WaitForSeconds(0.2f);
         damageEffect.SetActive(false);
+    }
+
+    public int GetMaxHealthPoints()
+    {
+        return maxHealthPoints;
+    }
+
+    public int GetHealthPoints()
+    {
+        return healthPoints;
     }
 
     //Should be called everytime the player takes damage
@@ -631,6 +729,13 @@ public class PlayerController : MonoBehaviour
         {
             enemies[i].SetActive(false);
         }
+
+        amountOfTimesDied++;
+    }
+
+    public static int GetAmountOfTimesDied()
+    {
+        return amountOfTimesDied;
     }
 
     void Retry()
@@ -801,7 +906,26 @@ public class PlayerController : MonoBehaviour
     //Will sum the parameter to the current speed stacks
     void ModifySpeedStacks(int sum)
     {
+        //with this, field of view will decrease gradually
+        //if (sum < 0)
+        //{
+        //    StartCoroutine(FieldOfViewChange(fieldOfViewAugment/speedPowerUpStacks * -1));
+        //}
+
+        
+
+        if (sum > 0)
+        {
+            StartCoroutine(SetFieldOfView(baseFieldOfView + 4f));
+        }
+
         speedPowerUpStacks += sum;
+
+        //with this, field of view will decrease only when all stacks are lost
+        if (speedPowerUpStacks == 0)
+        {
+            StartCoroutine(SetFieldOfView(baseFieldOfView));
+        }
 
         if (speedPowerUpStacks > maxSpeedStacks)
         {
@@ -811,6 +935,9 @@ public class PlayerController : MonoBehaviour
         float effect = 1 + speedStackEffect * speedPowerUpStacks;
 
         speed = baseSpeed * effect;
+        dashStackChargingTime = baseDashChargingTime * effect;
+        //camera.fieldOfView = baseFieldOfView * effect; 
+        
 
         //Modify dash force in the same way speed is
         //forwardDashForce = baseForwardDashForce * effect;
@@ -818,13 +945,21 @@ public class PlayerController : MonoBehaviour
 
         //Speed already included in dash force
         //dashForce = baseDashForce * effect;
-        speedStackText.text = speedPowerUpStacks.ToString();
+
+        if(speedPowerUpStacks > 0)
+        {
+            speedStackText.text = speedPowerUpStacks.ToString();
+        }
+        else
+        {
+            speedStackText.text = "";
+        }
 
         //Resets 
         if (speedPowerUpStacks > 0)
         {
             speedStackBackground.SetActive(true);
-
+            
             if (!losingSpeedStacks)
             {
                 StartCoroutine(LoseSpeedStacks());
@@ -839,7 +974,66 @@ public class PlayerController : MonoBehaviour
         else
         {
             //speedStackBackground.SetActive(false);
+            //StartCoroutine(FieldOfViewReset());
         }
+    }
+
+    IEnumerator SetFieldOfView(float field)
+    {
+        float totalChange = 0;
+        float change =field - camera.fieldOfView;
+        Debug.Log("change: " + change);
+        float rate = 0.05f;
+        if (change > 0 && camera.fieldOfView < maxFieldOfView)
+        {
+            while (totalChange < change)
+            {
+                totalChange += change * rate;
+                Debug.Log("total change: " + totalChange);
+                camera.fieldOfView += change * rate;
+                yield return new WaitForSeconds(0.01f);
+            }
+        }
+
+        else if (change < 0)
+        {
+            while (totalChange > change)
+            {
+                totalChange += change * rate;
+                Debug.Log("total change: " + totalChange);
+                camera.fieldOfView += change * rate;
+                yield return new WaitForSeconds(0.01f);
+            }
+        }
+    }
+
+    IEnumerator FieldOfViewChange(float change)
+    {
+        float totalChange = 0;
+        Debug.Log("change: " + change);
+        float rate = 0.05f;
+        if(change > 0 && camera.fieldOfView < maxFieldOfView)
+        {
+            while (totalChange < change)
+            {
+                totalChange += change * rate;
+                Debug.Log("total change: " + totalChange);
+                camera.fieldOfView += change * rate;
+                yield return new WaitForSeconds(0.01f);
+            }
+        }
+
+        else if (change < 0)
+        {
+            while (totalChange > change)
+            {
+                totalChange += change * rate;
+                Debug.Log("total change: " + totalChange);
+                camera.fieldOfView += change * rate;
+                yield return new WaitForSeconds(0.01f);
+            }
+        }
+
     }
 
     void UpdateStacksGraphicalInfo()
@@ -876,6 +1070,15 @@ public class PlayerController : MonoBehaviour
         cameraMovementEnabled = newValue;
     }
 
+    public void RegisterDummyPunch()
+    {
+        timesDummyWasPunched++;
+    }
+
+    public int GetTimesDummyWasPunched()
+    {
+        return timesDummyWasPunched;
+    }
     //public IEnumerator IntroduceText(string textToIntroduce, AudioSource writingSoundEffect, int numberOfPlays)
     //{
     //    yield return new WaitForSeconds(0.01f);
@@ -1024,5 +1227,11 @@ public class PlayerController : MonoBehaviour
     {
         dashStackAmount = newDashes;
         updateDashGraphicalInfo();
+    }
+
+    void OnApplicationQuit()
+    {
+        //Debug.Log("Supuestamente enviado");
+        AnalyticsUtils.RegisterQuitEvent();
     }
 }

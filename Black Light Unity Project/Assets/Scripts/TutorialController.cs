@@ -2,6 +2,8 @@
 using System.Collections;
 using UnityEngine.UI;
 using System;
+using UnityEngine.Analytics;
+using System.Collections.Generic;
 
 public class TutorialController : Interactive
 {
@@ -77,7 +79,7 @@ public class TutorialController : Interactive
 
     void Start()
     {
-        currentEvent = 4;
+       currentEvent = 4;
         Cursor.visible = false;
         shouldMove = false;
         StartCoroutine(ManageEvents());
@@ -329,7 +331,6 @@ public class TutorialController : Interactive
     }
 
     //Should be moved to Player Controller later
-
     public override void DoAction()
     {
         ContinueConversation();
@@ -470,6 +471,10 @@ public class TutorialController : Interactive
         else if (currentEvent == 12)
         {
             // currentLine = "You're done?|0.4| Okay.|0.2| I'll take back the dummy and we'll move on to the next step.";
+            //  Use this call for wherever a player triggers a custom event
+
+            AnalyticsUtils.RegisterDummyEvent();
+
             currentLine = "You're done?|0.4| Okay.|0.2| Next step is real combat.";
             dummy.SetActive(false);
             currentEvent = 14;
@@ -728,11 +733,19 @@ public class TutorialController : Interactive
     public void RegisterDummyPunch()
     {
         GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("");
+
+
+
         currentEvent = 12;
     }
 
     public void Retry()
     {
         currentEvent = lastCheckpoint;
+    }
+
+    public static int GetCurrentEvent()
+    {
+        return currentEvent;
     }
 }

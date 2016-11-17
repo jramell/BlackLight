@@ -15,6 +15,8 @@ public class DummyController : MonoBehaviour {
             GameObject.Find("BlueP").GetComponent<TutorialController>().RegisterDummyPunch();
             punched = true;
         }
+
+        GameObject.Find("Player").GetComponent<PlayerController>().RegisterDummyPunch();
     }
 	
 	// Update is called once per frame

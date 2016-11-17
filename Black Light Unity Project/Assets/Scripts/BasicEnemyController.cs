@@ -75,6 +75,7 @@ public class BasicEnemyController : MonoBehaviour
     void Die()
     {
         isDead = true;
+        PlayerController.InformEnemyDeath();
         Destroy(gameObject);
     }
 

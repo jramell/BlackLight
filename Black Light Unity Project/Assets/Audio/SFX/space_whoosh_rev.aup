@@ -1,0 +1,39 @@
+<?xml version="1.0" standalone="no" ?>
+<!DOCTYPE project PUBLIC "-//audacityproject-1.3.0//DTD//EN" "http://audacity.sourceforge.net/xml/audacityproject-1.3.0.dtd" >
+<project xmlns="http://audacity.sourceforge.net/xml/" projname="space_whoosh_rev_data" version="1.3.0" audacityversion="2.1.2" sel0="0.0340275772" sel1="0.0340275772" vpos="0" h="0.0000000000" zoom="235.1034268466" rate="44100.0" snapto="off" selectionformat="hh:mm:ss + milliseconds" frequencyformat="Hz" bandwidthformat="octaves">
+	<tags>
+		<tag name="TITLE" value="SpaceWhoosh 1024_32_7"/>
+		<tag name="Copyright" value="2014Series 1000 General"/>
+		<tag name="COMMENTS" value="SPACE, WHOOSH - LEFT TO RIGHT, SCI FI Space Whooshes, Swooshes &amp; Warbles (Vintage Recording)"/>
+		<tag name="Software" value="Lavf57.57.100"/>
+		<tag name="ARTIST" value="Series 1000 General"/>
+		<tag name="YEAR" value="2014"/>
+		<tag name="GENRE" value="SPACE, WHOOSH"/>
+	</tags>
+	<wavetrack name="space_whoosh" channel="0" linked="1" mute="0" solo="0" height="150" minimized="0" isSelected="1" rate="44100" gain="1.0" pan="0.0">
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="38141">
+				<waveblock start="0">
+					<simpleblockfile filename="e00008e0.au" len="2439" min="-0.018425" max="0.010055" rms="0.000729"/>
+				</waveblock>
+				<waveblock start="2439">
+					<simpleblockfile filename="e0000b67.au" len="35702" min="-0.252136" max="0.245197" rms="0.034011"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="space_whoosh" channel="1" linked="0" mute="0" solo="0" height="150" minimized="0" isSelected="1" rate="44100" gain="1.0" pan="0.0">
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="38141">
+				<waveblock start="0">
+					<simpleblockfile filename="e000023f.au" len="2439" min="-0.022822" max="0.013414" rms="0.000928"/>
+				</waveblock>
+				<waveblock start="2439">
+					<simpleblockfile filename="e00008fa.au" len="35702" min="-0.193102" max="0.204646" rms="0.024115"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+</project>
