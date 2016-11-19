@@ -912,8 +912,6 @@ public class PlayerController : MonoBehaviour
         //    StartCoroutine(FieldOfViewChange(fieldOfViewAugment/speedPowerUpStacks * -1));
         //}
 
-        
-
         if (sum > 0)
         {
             StartCoroutine(SetFieldOfView(baseFieldOfView + 4f));
@@ -950,10 +948,11 @@ public class PlayerController : MonoBehaviour
         {
             speedStackText.text = speedPowerUpStacks.ToString();
         }
-        else
-        {
-            speedStackText.text = "";
-        }
+
+        //else
+        //{
+        //    speedStackText.text = "";
+        //}
 
         //Resets 
         if (speedPowerUpStacks > 0)
@@ -1104,7 +1103,7 @@ public class PlayerController : MonoBehaviour
         string[] textGroup = textToIntroduce.Split('|');
 
         char[] textInChar = null;
-        float counterForPlaying = 0.0f;
+        //float counterForPlaying = 0.0f;
         bool shouldPlay = writingSoundEffect != null;
         string finalText = "";
         for (int j = 0; j < textGroup.Length; j++)
@@ -1199,7 +1198,7 @@ public class PlayerController : MonoBehaviour
     public void DisplayWarning(string warning)
     {
         tutorialText.color = PlayerUtils.warningColor;
-        tutorialText.text = "<color=yellow><size=24>!</size></color>  " + warning;
+        tutorialText.text = "<color=yellow><size=26>!</size></color>  " + warning;
     }
 
     public void DisplayTip(string tip)

@@ -396,6 +396,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 1)
         {
+            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("");
             currentLine = "";
             StartCoroutine(ManageEvents());
         }
@@ -409,6 +410,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 3)
         {
+            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("");
             currentLine = "";
             GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("Use W, A, S and D to move");
             StartCoroutine(ManageEvents());
@@ -423,6 +425,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 5)
         {
+            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("");
             currentLine = "";
             StartCoroutine(ManageEvents());
         }
@@ -542,21 +545,23 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 18)
         {
-            currentLine = "It's simple:|0.2| press Left Shift or Right Click to dash in the direction you're moving.";
+            currentLine = "It's simple:|0.2| press LeftShift to dash in the direction you're moving.";
             currentEvent++;
         }
 
         else if (currentEvent == 19)
         {
+
             currentLine = "";
-            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("Press Left Shift or Right Click to dash");
+            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("Press LeftShift to dash");
             currentEvent = 1007;
         }
 
         else if (currentEvent == 1007)
         {
             GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("");
-            currentLine = "You become @<b>i</b>@@<b>n</b>@@<b>v</b>@@<b>u</b>@@<b>l</b>@@<b>n</b>@@<b>e</b>@@<b>r</b>@@<b>a</b>@@<b>b</b>@@<b>l</b>@@<b>e</b>@ for a short time after dashing, so you can use it to avoid damage.";
+            //currentLine = "You become @<b>i</b>@@<b>n</b>@@<b>v</b>@@<b>u</b>@@<b>l</b>@@<b>n</b>@@<b>e</b>@@<b>r</b>@@<b>a</b>@@<b>b</b>@@<b>l</b>@@<b>e</b>@ for a short time after dashing, so you can use it to avoid damage.";
+            currentLine = "You become invulnerable for a short time after dashing, so you can use it to avoid damage.";
             currentEvent = 20;
         }
 
@@ -570,6 +575,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 1001)
         {
+            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("");
             currentLine = "";
             StartCoroutine(ManageEvents());
         }
@@ -583,7 +589,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 1002)
         {
-            currentLine = "Use your invulnerability to go <b>through</b> one of his attacks!";
+            currentLine = "Use your invulnerability to go through one of his attacks!";
             currentEvent = 22;
         }
 
@@ -611,13 +617,13 @@ public class TutorialController : Interactive
                 if (GameObject.Find("Player").GetComponent<PlayerController>().GetBlockedAttacks() > 0)
                 {
                     GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("");
-                    currentLine = "Well done!|0.3| So far,|0.1| you've learned to interact,|0.1| punch,|0.1| dash|0.1| and dodge.";
+                    currentLine = "Well done!|0.2| Final lesson then:|0.3| power ups.";
                     currentEvent = 25;
                 }
 
                 else
                 {
-                    currentLine = "Not that straight forward this time, huh?|0.4| Here, try again.";
+                    currentLine = "Not so easy to dash through attacks, huh?|0.4| Here, try again.";
                     GameObject.Find("Player").GetComponent<PlayerController>().ReplenishHealth();
                     GameObject.Find("Player").GetComponent<PlayerController>().DisplayWarning("Finishing the conversation will spawn an enemy");
                     currentEvent = 22;
@@ -633,13 +639,13 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 25)
         {
-            currentLine = "Final lesson then:|0.3| power ups.";
+            currentLine = "You pick them up, they make you faster. ";
             currentEvent++;
         }
 
         else if (currentEvent == 26)
         {
-            currentLine = "You pick them up, they make you faster. Use this to track them.";
+            currentLine = "Use this to track them.";
             currentEvent = 1003;
         }
 
@@ -657,7 +663,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 1005)
         {
-            currentLine = "Hold LeftCtrl to see the power ups around you.|0.2| Think of it as a \"battle mode\".";
+            currentLine = "Hold LeftCtrl to see the power ups around you.";
             currentEvent = 27;
         }
 
@@ -671,7 +677,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 28)
         {
-            currentLine = "That's it. Now go to the spot and something should happen";
+            currentLine = "That's it. Now pick them up to get faster.";
             currentEvent++;
         }
 
@@ -683,34 +689,31 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 30)
         {
-            currentLine = "Nice, I knew it had something to do with speed. Apparently, each stack makes you faster and your " +
-               "dashes more effective. You lose them after some time, though, and surely there's a limit to how many you can have at a time";
+            currentLine = "Welp, that's as far as the demo goes right now. ";
             currentEvent++;
         }
 
         else if (currentEvent == 31)
         {
-            currentLine = "Also, you can prolly only see them spots a few meters around you each time you concentrate, so it's prolly "+ 
-                "a good idea to try to see them constantly while fighting. ";
+            currentLine = "Thank you for playing!|0.2| I'll be adding the following stuff soon:";
             currentEvent++;
         }
 
         else if (currentEvent == 32)
         {
-            currentLine = "Er... Hmm... Uh...";
+            currentLine = "";
             currentEvent++;
         }
 
         else if (currentEvent == 33)
         {
-            currentLine = "I don't really have a way to explain that better right now. Just spam LeftShift if you want to see more power ups. " + 
-                "If I come up with an idea to teach you, I'll put it here";
+            currentLine = "Enemies grunt when you kill them. Enemies do not dissappear instantly, but are pushed by your punches.";
             currentEvent++;
         }
 
         else if (currentEvent == 34)
         {
-            currentLine = "";
+            currentLine = "Footsteps sound effects. Small practice with enemies using the power up mechanic. After that, final challenge with lots of enemies and a cool soundtrack.";
             currentEvent++;
         }
 
