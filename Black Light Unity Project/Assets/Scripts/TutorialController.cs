@@ -87,7 +87,7 @@ public class TutorialController : Interactive
     }
     void Start()
     {
-        //currentEvent = 4;
+       // currentEvent = 4;
         Cursor.visible = false;
         shouldMove = false;
         StartCoroutine(ManageEvents());
@@ -869,6 +869,11 @@ public class TutorialController : Interactive
         if(!FirstPowerUpEnemiesWereDefeated())
         {
             firstPowerUpEnemies.SetActive(true);
+            float childCount = firstPowerUpEnemies.transform.childCount;
+            for (int i = 0; i < childCount; i++)
+            {
+                firstPowerUpEnemies.transform.GetChild(i).gameObject.SetActive(true);
+            }
         }
     }
 

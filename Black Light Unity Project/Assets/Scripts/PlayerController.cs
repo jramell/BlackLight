@@ -238,13 +238,15 @@ public class PlayerController : MonoBehaviour
 
     private const string MOUSE_Y = "Mouse Y";
     private const string  MOUSE_X = "Mouse X";
+    private const string ENEMY_TAG = "Enemy";
+    private const string ENEMY_SPAWNER_TAG = "EnemySpawner";
 
     //--------------------------------------------------------------------------------------------------------------
     //Unity Analytics / Statistics
     //--------------------------------------------------------------------------------------------------------------
 
-        //Should Unity Analytics be active?
-    public const bool ANALYTICS_ACTIVE = false;
+    //Should Unity Analytics be active?
+    public const bool ANALYTICS_ACTIVE = true;
 
     //Name of the event that is registered when the player talks to Blue after he spawns the dummy.
     public const string PUNCH_DUMMY_EVENT_NAME = "Talk after dummy punch";
@@ -745,12 +747,25 @@ public class PlayerController : MonoBehaviour
         deathSound.Play();
         deathUI.SetActive(true);
 
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-
-        for (int i = 0; i < enemies.Length; i++)
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag(ENEMY_TAG);
+        GameObject[] enemySpawners = GameObject.FindGameObjectsWithTag(ENEMY_SPAWNER_TAG);
+        int length = enemies.Length;
+        for (int i = 0; i < length; i++)
         {
             enemies[i].SetActive(false);
+            
         }
+        length = enemySpawners.Length;
+        for (int k = 0; k <  length; k++)
+        {
+            for (int i = 0; i < length; i++)
+            {
+                enemySpawners[i].SetActive(false);
+
+            }
+        }
+
+        
 
         amountOfTimesDied++;
     }
@@ -1022,7 +1037,7 @@ public class PlayerController : MonoBehaviour
             while (totalChange > change)
             {
                 totalChange += change * rate;
-                Debug.Log("total change: " + totalChange);
+              //  Debug.Log("total change: " + totalChange);
                 camera.fieldOfView += change * rate;
                 yield return new WaitForSeconds(0.01f);
             }
