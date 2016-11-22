@@ -12,13 +12,10 @@ public class AttackMover : MonoBehaviour
 
     void Update()
     {
-        transform.Translate(0, 0, speed);
-        StartCoroutine(TurnLightOff());
-    }
-
-    IEnumerator TurnLightOff()
-    {
-        yield return new WaitForSeconds(0.2f);
+        if(Time.timeScale > 0)
+        {
+            transform.Translate(0, 0, speed);
+        }
     }
 
     void OnTriggerEnter(Collider col)

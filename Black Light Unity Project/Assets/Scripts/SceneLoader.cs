@@ -21,6 +21,8 @@ public class SceneLoader : MonoBehaviour
 
     private AudioSource backgroundMusic;
 
+    public Image[] mainMenuButtons;
+
     void Start()
     {
         backgroundMusic = GetComponent<AudioSource>();
@@ -41,17 +43,35 @@ public class SceneLoader : MonoBehaviour
         }
         yield return new WaitForSeconds(timeBetweenFades);
 
-        Color tempStartButtonColor = startButton.color;
-        Color tempStartTextColor = startButtonText.color;
+        //Color tempStartButtonColor = startButton.color;
+        //Color tempStartTextColor = startButtonText.color;
 
-        rateOfFade = 1 / timeOfStartButtonFade * 0.01f;
-        while (startButton.color.a < 1)
+        //rateOfFade = 1 / timeOfStartButtonFade * 0.01f;
+        //while (startButton.color.a < 1)
+        //{
+        //    tempStartButtonColor.a += rateOfFade;
+        //    tempStartTextColor.a += rateOfFade;
+        //    startButton.color = tempStartButtonColor;
+        //    startButtonText.color = tempStartTextColor;
+        //    yield return new WaitForSeconds(rateOfFade);
+        //}
+        int length = mainMenuButtons.Length;
+        for (int i = 0; i < length; i++)
         {
-            tempStartButtonColor.a += rateOfFade;
-            tempStartTextColor.a += rateOfFade;
-            startButton.color = tempStartButtonColor;
-            startButtonText.color = tempStartTextColor;
-            yield return new WaitForSeconds(rateOfFade);
+            Text currentButtonText = mainMenuButtons[i].transform.Find("Text").gameObject.GetComponent<Text>();
+            Color tempStartButtonColor = mainMenuButtons[i].color;
+            Color tempStartTextColor = currentButtonText.color;
+
+            rateOfFade = 1 / timeOfStartButtonFade * 0.01f;
+            while (mainMenuButtons[i].color.a < 1)
+            {
+                tempStartButtonColor.a += rateOfFade;
+                tempStartTextColor.a += rateOfFade;
+                mainMenuButtons[i].color = tempStartButtonColor;
+                currentButtonText.color = tempStartTextColor;
+                yield return new WaitForSeconds(rateOfFade);
+            }
+            yield return new WaitForSeconds(0.3f);
         }
     }
 
@@ -82,5 +102,10 @@ public class SceneLoader : MonoBehaviour
     public static void LoadSceneWithName(string sceneToLoad)
     {
         SceneManager.LoadScene(sceneToLoad);
+    }
+
+    public void Quit()
+    {
+        Application.Quit();
     }
 }

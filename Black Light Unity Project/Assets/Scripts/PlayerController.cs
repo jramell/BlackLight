@@ -6,6 +6,9 @@ using UnityStandardAssets.ImageEffects;
 
 public class PlayerController : MonoBehaviour
 {
+
+    private const string HORIZONTAL = "Horizontal";
+    private const string VERTICAL = "Vertical";
     //--------------------------------------------------------------------------------------------------------------
     //Public variables
     //--------------------------------------------------------------------------------------------------------------
@@ -231,6 +234,11 @@ public class PlayerController : MonoBehaviour
 
     private float baseFieldOfView;
 
+    private TutorialController tutorialController;
+
+    private const string MOUSE_Y = "Mouse Y";
+    private const string  MOUSE_X = "Mouse X";
+
     //--------------------------------------------------------------------------------------------------------------
     //Unity Analytics / Statistics
     //--------------------------------------------------------------------------------------------------------------
@@ -266,6 +274,7 @@ public class PlayerController : MonoBehaviour
     void Awake()
     {
         contrastEnhance = transform.Find("Main Camera").gameObject.GetComponent<ContrastEnhance>();
+        tutorialController = GameObject.Find("BlueP").GetComponent<TutorialController>();
     }
 
     void Start()
@@ -324,8 +333,8 @@ public class PlayerController : MonoBehaviour
                 if (movementEnabled)
                 {
                     //Moves the player
-                    translate = new Vector3(Input.GetAxis("Horizontal") * speed * Time.deltaTime, 0,
-                                        Input.GetAxis("Vertical") * speed * Time.deltaTime);
+                    translate = new Vector3(Input.GetAxis(HORIZONTAL) * speed * Time.deltaTime, 0,
+                                        Input.GetAxis(VERTICAL) * speed * Time.deltaTime);
                     transform.Translate(translate);
 
                     //if(translate.Equals)
@@ -341,36 +350,43 @@ public class PlayerController : MonoBehaviour
                     camera.transform.localEulerAngles = new Vector3(xRot, 0, 0);
 
                     //Because vertical camera rotation is relative to the in-game x axis
-                    xRot += Input.GetAxis("Mouse Y") * sensitivity * -1;
+                    xRot += Input.GetAxis(MOUSE_Y) * sensitivity * -1;
 
                     //Because horizontal camera rotation is relative to the in-game y axis
-                    yRot += Input.GetAxis("Mouse X") * sensitivity;
+                    yRot += Input.GetAxis(MOUSE_X) * sensitivity;
 
                     xRot = Mathf.Clamp(xRot, -55, 35);
                 }
 
-                if (canInteract)
+                if (canInteract && hit.collider != null && hit.collider.tag == "Interactive" && hit.distance < interactionRange)
                 {
-                    if (hit.collider != null && hit.collider.tag == "Interactive" && hit.distance < interactionRange)
-                    {
+                    //if (hit.collider != null && hit.collider.tag == "Interactive" && hit.distance < interactionRange)
+                    //{
                         hit.collider.gameObject.SendMessage("UpdateInteractionText");
 
-                        if (Input.GetKeyDown(KeyCode.F))
+                        if (Input.GetKeyDown(KeyCode.F) || Input.GetMouseButtonDown(0))
                         {
                             hit.collider.gameObject.SendMessage("DoAction");
                         }
-                    }
+                    //}
 
-                    else if (interactText.GetComponent<Text>().text != "")
-                    {
-                        CleanInteractionText();
-                    }
+//                    else if (interactText.GetComponent<Text>().text != "")
+  //                  {
+    //                    CleanInteractionText();
+      //              }
                 }
 
-
+                else if (interactText.GetComponent<Text>().text != "")
+                {
+                    CleanInteractionText();
+                }
 
                 //Receive input for attack
-                if (Input.GetMouseButton(0))
+                //if (Input.GetMouseButton(0))
+                //{
+                //    StartCoroutine(Attack());
+                //}
+                else if (Input.GetMouseButton(0))
                 {
                     StartCoroutine(Attack());
                 }
@@ -390,13 +406,14 @@ public class PlayerController : MonoBehaviour
                     StartCoroutine(ChargeStacks());
                 }
 
-                if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetMouseButton(2))
+                if (Input.GetKeyDown(KeyCode.LeftControl))
                 {
-                   Debug.Log("visor effect active: " + isVisorOn);
-                    if(!isVisorOn)
+                    //Debug.Log("visor effect active: " + isVisorOn);
+                    if (!isVisorOn)
                     {
                         StartCoroutine(ActivateEnergyVission());
                     }
+
                     else
                     {
                         ActivateVission(false);
@@ -407,17 +424,18 @@ public class PlayerController : MonoBehaviour
                 }
             }
 
-            else if (introducingText && Input.GetKey(KeyCode.F))
+            else if (introducingText )
             {
                 //if F is pressed when talking to someone
-                if (Input.GetKeyDown(KeyCode.F))
+                if (Input.GetKeyDown(KeyCode.F) || Input.GetMouseButtonDown(0))
                 {
                     shouldSkipText = true;
                 }
+
             }
 
             //A conversation is active in a conversation, so it must continue when the player presses F
-            else if (Input.GetKeyDown(KeyCode.F))
+            else if (Input.GetKeyDown(KeyCode.F) || Input.GetMouseButtonDown(0))
             {
                 ContinueConversation();
             }
@@ -502,7 +520,7 @@ public class PlayerController : MonoBehaviour
             //    tempColor.a = (timeShiftHasBeenPressed / timeToActivateVission) * originalAlpha * 0.8f;
             //    visorEffect.GetComponent<Image>().color = tempColor;
             contrastEnhance.intensity = (timeShiftHasBeenPressed / timeToActivateVission) * (contrastInBattleMode + 5f);
-            Debug.Log("intensity: " + contrastEnhance.intensity);
+            //Debug.Log("intensity: " + contrastEnhance.intensity);
         }
 
 
@@ -516,17 +534,18 @@ public class PlayerController : MonoBehaviour
             ActivateVission(true);
             
             yield return new WaitForSeconds(0.2f);
-            Debug.Log("started with intensity " + contrastEnhance.intensity);
+            //Debug.Log("started with intensity " + contrastEnhance.intensity);
             float rate = contrastEnhance.intensity - contrastInBattleMode;
             while (contrastEnhance.intensity > contrastInBattleMode)
             {
-                Debug.Log("passed with intensity " + contrastEnhance.intensity);
+               // Debug.Log("passed with intensity " + contrastEnhance.intensity);
                 contrastEnhance.intensity -= rate * 0.05f;
                 yield return new WaitForSeconds(0.01f);
             }
             //contrastEnhance.intensity = 2.6f;
             
             isVisorOn = true;
+            tutorialController.PressedLeftCtrl();
             yield return new WaitForSeconds(0.2f);
         }
 
@@ -573,8 +592,11 @@ public class PlayerController : MonoBehaviour
             accumulatedStackChargingTime += 0.01f;
             dashStackLoadingCounter.fillAmount = Mathf.Max(0, (float)accumulatedStackChargingTime / dashStackChargingTime);
         }
-
+        
+        if(dashStackAmount < dashMaxStacks)
+        {
         dashStackAmount += 1;
+        }
         accumulatedStackChargingTime = 0.0f;
         isChargingStacks = false;
         updateDashGraphicalInfo();
@@ -743,7 +765,7 @@ public class PlayerController : MonoBehaviour
         ReplenishHealth();
         isDead = false;
         transform.position = GameObject.Find("Respawn").transform.position;
-        GameObject.Find("Baroth").GetComponent<TutorialController>().Retry();
+        GameObject.Find("BlueP").GetComponent<TutorialController>().Retry();
         deathUI.SetActive(false);
     }
 
@@ -874,6 +896,7 @@ public class PlayerController : MonoBehaviour
         if (type == Utils.POWER_UP_SPEED)
         {
             ModifySpeedStacks(1);
+            tutorialController.PlayerTouchedPowerUp();
         }
     }
 
@@ -933,7 +956,7 @@ public class PlayerController : MonoBehaviour
         float effect = 1 + speedStackEffect * speedPowerUpStacks;
 
         speed = baseSpeed * effect;
-        dashStackChargingTime = baseDashChargingTime * effect;
+        dashStackChargingTime = baseDashChargingTime / effect;
         //camera.fieldOfView = baseFieldOfView * effect; 
         
 
@@ -944,10 +967,10 @@ public class PlayerController : MonoBehaviour
         //Speed already included in dash force
         //dashForce = baseDashForce * effect;
 
-        if(speedPowerUpStacks > 0)
-        {
+   //     if(speedPowerUpStacks > 0)
+    //    {
             speedStackText.text = speedPowerUpStacks.ToString();
-        }
+      //  }
 
         //else
         //{
@@ -981,14 +1004,14 @@ public class PlayerController : MonoBehaviour
     {
         float totalChange = 0;
         float change =field - camera.fieldOfView;
-        Debug.Log("change: " + change);
+        //Debug.Log("change: " + change);
         float rate = 0.05f;
         if (change > 0 && camera.fieldOfView < maxFieldOfView)
         {
             while (totalChange < change)
             {
                 totalChange += change * rate;
-                Debug.Log("total change: " + totalChange);
+          //      Debug.Log("total change: " + totalChange);
                 camera.fieldOfView += change * rate;
                 yield return new WaitForSeconds(0.01f);
             }
@@ -1072,6 +1095,11 @@ public class PlayerController : MonoBehaviour
     public void RegisterDummyPunch()
     {
         timesDummyWasPunched++;
+
+        if (timesDummyWasPunched > 5)
+        {
+            DisplayTip("This dummy is immortal");
+        }
     }
 
     public int GetTimesDummyWasPunched()
@@ -1114,9 +1142,9 @@ public class PlayerController : MonoBehaviour
             for (int i = 0; i < textInChar.Length; i++)
             {
                 //Debug.Log("iteration: " + i + " .. buffer: " + buffer);
-				if (buffer != "" && buffer.ToCharArray()[0] == '@')
+				if (buffer != "" && buffer.ToCharArray()[0] == '%')
                 {
-                    if(textInChar[i] == '@')
+                    if(textInChar[i] == '%')
                     {
                         dialogText.text += buffer.Substring(1, (buffer.Length - 1));
                         buffer = "";
@@ -1129,7 +1157,7 @@ public class PlayerController : MonoBehaviour
                         continue;
                 }
 
-                if(textInChar[i] == '@')
+                if(textInChar[i] == '%')
                 {
                     buffer += textInChar[i];
                     continue;

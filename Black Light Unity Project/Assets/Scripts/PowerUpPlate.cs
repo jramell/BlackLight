@@ -7,24 +7,50 @@ public class PowerUpPlate : MonoBehaviour
     //Power up type
     string type;
 
-    bool used;
+    float lastTimeUsed;
+
+    public float cooldown;
+
+    float originalParticleSpeed;
+
+    ParticleSystem particleSystem;
+
+    PlayerController playerController;
 
     void Start()
     {
         type = Utils.POWER_UP_SPEED;
+        particleSystem = transform.Find("Particles").gameObject.GetComponent<ParticleSystem>();
+        originalParticleSpeed = particleSystem.startSpeed;
+        playerController = GameObject.Find("Player").GetComponent<PlayerController>();
     }
 
     void OnTriggerEnter(Collider col)
     {
-        if (!used)
+        if (Time.time - lastTimeUsed > cooldown)
         {
             if (col.gameObject.tag == "Player")
             {
-                col.gameObject.GetComponent<PlayerController>().GetComponent<PlayerController>().ReceivePowerUp(type);
+                playerController.ReceivePowerUp(type);
                 gameObject.GetComponent<AudioSource>().Play();
-                //used = true;
-               // Destroy(gameObject, gameObject.GetComponent<AudioSource>().clip.length);
+                lastTimeUsed = Time.time;
+                StartCoroutine(StartCooldown());
             }
+        }
+    }
+
+    IEnumerator StartCooldown()
+    {
+     //   float result = (cooldown - (Time.time - lastTimeUsed)) * originalParticleSpeed;
+        float tempCooldown = 0;
+        float tempRelation = 0;
+        float waitingTime = 0.2f;
+        while(tempCooldown < 5)
+        {
+            tempRelation = (tempCooldown / cooldown) * originalParticleSpeed;
+            particleSystem.startSpeed = tempRelation;
+            yield return new WaitForSeconds(waitingTime);
+            tempCooldown += waitingTime;
         }
     }
 

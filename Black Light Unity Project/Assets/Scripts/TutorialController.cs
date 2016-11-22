@@ -37,6 +37,8 @@ public class TutorialController : Interactive
 
     public GameObject speedUI;
 
+    public GameObject firstPowerUpEnemies;
+
     //--------------------------------------------------------------------------------------------------------------
     //Variables
     //--------------------------------------------------------------------------------------------------------------
@@ -73,17 +75,25 @@ public class TutorialController : Interactive
 
     public GameObject sfxContainer;
 
+    private PlayerController playerController;
+
     //--------------------------------------------------------------------------------------------------------------
     //Functions
     //--------------------------------------------------------------------------------------------------------------
 
+    void Awake()
+    {
+        playerController = GameObject.Find("Player").GetComponent<PlayerController>();
+    }
     void Start()
     {
-       currentEvent = 4;
+        //currentEvent = 4;
         Cursor.visible = false;
         shouldMove = false;
         StartCoroutine(ManageEvents());
         writingSoundEffect = GameObject.Find("BlueP").GetComponent<AudioSource>();
+        //Debug.Log("enemies childs: " + firstPowerUpEnemies.transform.childCount);
+        //Debug.Log("exists: " + firstPowerUpEnemies.transform.Find("Basic_Enemy (1)"));
     }
 
     void Update()
@@ -98,37 +108,37 @@ public class TutorialController : Interactive
             }
         }
 
-        if (currentEvent >= 26 && currentEvent < 28)
-        {
-            Collider[] colliders = Physics.OverlapSphere(transform.position, 10);
-            for (int i = 0; i < colliders.Length; i++)
-            {
-                if (colliders[i].gameObject.tag == "PowerUpPlate")
-                {
-                    //GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("");
-                    GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("Touch the spot to get a power up");
-                    currentEvent = 28;
-                }
-            }
-        }
+        //if (currentEvent >= 26 && currentEvent < 28)
+        //{
+        //    Collider[] colliders = Physics.OverlapSphere(transform.position, 10);
+        //    for (int i = 0; i < colliders.Length; i++)
+        //    {
+        //        if (colliders[i].gameObject.tag == "PowerUpPlate")
+        //        {
+        //            //playerController.DisplayTip("");
+        //            playerController.DisplayTip("Touch the spot to get a power up");
+        //            currentEvent = 28;
+        //        }
+        //    }
+        //}
 
-        if (currentEvent >= 28 && currentEvent < 30)
-        {
-            bool touchedPowerUp = true;
-            Collider[] colliders = Physics.OverlapSphere(transform.position, 10);
-            for (int i = 0; i < colliders.Length; i++)
-            {
-                if (colliders[i].gameObject.tag == "PowerUpPlate")
-                {
-                    touchedPowerUp = false;
-                }
-            }
+        //if (currentEvent >= 28 && currentEvent < 30)
+        //{
+        //    bool touchedPowerUp = true;
+        //    Collider[] colliders = Physics.OverlapSphere(transform.position, 10);
+        //    for (int i = 0; i < colliders.Length; i++)
+        //    {
+        //        if (colliders[i].gameObject.tag == "PowerUpPlate")
+        //        {
+        //            touchedPowerUp = false;
+        //        }
+        //    }
 
-            if(touchedPowerUp)
-            {
-                currentEvent = 30;
-            }
-        }
+        //    if(touchedPowerUp)
+        //    {
+        //        currentEvent = 30;
+        //    }
+        //}
     }
 
     public static void SetCurrentEvent(int current)
@@ -140,6 +150,7 @@ public class TutorialController : Interactive
     {
         if (currentEvent == 0)
         {
+            Debug.Log("starts 0 event");
             //So the player can't interact with it at first
             gameObject.tag = "Untagged";
             SetPlayerMovement(false);
@@ -147,14 +158,14 @@ public class TutorialController : Interactive
 
             //Starts talking, then leave it to the player to continue
             currentLine = "Hey there!|1| This is a demo that serves as a proof of concept for certain game mechanics.|0.7| I,|0.2| Blue P.,|0.2| will be your guide.";
-            //GameObject.Find("Player").GetComponent<PlayerController>().SetInteractivity(false);
+            //playerController.SetInteractivity(false);
             yield return StartCoroutine(Talk());
             yield break;
         }
 
         if (currentEvent == 1)
         {
-            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("");
+            playerController.DisplayTip("");
             currentEvent++;
             yield return new WaitForSeconds(0.3f);
             AudioSource audio = sfxContainer.GetComponents<AudioSource>()[1];
@@ -162,14 +173,14 @@ public class TutorialController : Interactive
             yield return new WaitForSeconds(audio.clip.length + 0.05f);
             roomLight.SetActive(true);
             gameObject.tag = "Interactive";
-            GameObject.Find("Player").GetComponent<PlayerController>().SetCameraMovementEnabled(true);
+            playerController.SetCameraMovementEnabled(true);
             //So the player can interact with it from now on
             yield break;
         }
 
         if (currentEvent == 3)
         {
-            GameObject.Find("Player").GetComponent<PlayerController>().SetMovementEnabled(true);
+            playerController.SetMovementEnabled(true);
             shouldMove = true;
             currentEvent++;
             yield break;
@@ -177,7 +188,7 @@ public class TutorialController : Interactive
 
         if (currentEvent == 5)
         {
-            GameObject.Find("Player").GetComponent<PlayerController>().DisableInteraction();
+            playerController.DisableInteraction();
             Vector3 initialScale = healthBar.transform.localScale;
             Vector3 tempScale = new Vector3(1.6f, 4, 1);
             RectTransform healthBarRect = healthBar.GetComponent<RectTransform>();
@@ -210,15 +221,15 @@ public class TutorialController : Interactive
 
             sfxContainer.GetComponents<AudioSource>()[0].Play();
             currentEvent++;
-            GameObject.Find("Player").GetComponent<PlayerController>().EnableInteraction();
+            playerController.EnableInteraction();
             yield break;
         }
 
         if(currentEvent == 1001)
         {
-            GameObject.Find("Player").GetComponent<PlayerController>().SetDashStacks(3);
-            GameObject.Find("Player").GetComponent<PlayerController>().DisableInteraction();
-            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("");
+            playerController.SetDashStacks(3);
+            playerController.DisableInteraction();
+            playerController.DisplayTip("");
             currentEvent = 21;
             Vector3 initialScale = dashUI.transform.localScale;
             Vector3 tempScale = new Vector3(3f, 4, 1);
@@ -251,15 +262,15 @@ public class TutorialController : Interactive
 
             sfxContainer.GetComponents<AudioSource>()[0].Play();
             //currentEvent = 21;
-            GameObject.Find("Player").GetComponent<PlayerController>().EnableInteraction();
+            playerController.EnableInteraction();
 
         }
 
 
         if (currentEvent == 1003)
         {
-            GameObject.Find("Player").GetComponent<PlayerController>().DisableInteraction();
-            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("");
+            playerController.DisableInteraction();
+            playerController.DisplayTip("");
             currentEvent = 1004;
             Vector3 initialScale = speedUI.transform.localScale;
             Vector3 tempScale = new Vector3(3f, 4, 0.2f);
@@ -292,25 +303,25 @@ public class TutorialController : Interactive
             }
 
             sfxContainer.GetComponents<AudioSource>()[0].Play();
-            GameObject.Find("Player").GetComponent<PlayerController>().EnableInteraction();
+            playerController.EnableInteraction();
         }
     }
 
     //Enables or disables player movement according to the parameter
     void SetPlayerMovement(bool enabled)
     {
-        GameObject.Find("Player").GetComponent<PlayerController>().SetMovementEnabled(enabled);
-        GameObject.Find("Player").GetComponent<PlayerController>().SetCameraMovementEnabled(enabled);
+        playerController.SetMovementEnabled(enabled);
+        playerController.SetCameraMovementEnabled(enabled);
     }
 
     IEnumerator Talk()
     {
         talkingToPlayer = true;
-        yield return StartCoroutine(GameObject.Find("Player").GetComponent<PlayerController>().IntroduceNewText(currentLine, writingSoundEffect, characterWriteDelay, 1000, gameObject));
+        yield return StartCoroutine(playerController.IntroduceNewText(currentLine, writingSoundEffect, characterWriteDelay, 1000, gameObject));
 
         if (currentEvent == 0)
         {
-            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("Press F to continue the conversation");
+            playerController.DisplayTip("Press F to continue the conversation");
         }
 
     }
@@ -318,13 +329,13 @@ public class TutorialController : Interactive
     void FinishConversation()
     {
         talkingToPlayer = false;
-        GameObject.Find("Player").GetComponent<PlayerController>().FinishConversation();
+        playerController.FinishConversation();
     }
 
     void LeaveRoom()
     {
         GameObject.Find("Door").GetComponent<AudioSource>().Play();
-        GameObject.Find("Player").GetComponent<PlayerController>().SetInteractivity(true);
+        playerController.SetInteractivity(true);
         shouldMove = false;
         Destroy(gameObject, GameObject.Find("Door").GetComponent<AudioSource>().clip.length);
         //Allows the player to interact with the door
@@ -346,7 +357,7 @@ public class TutorialController : Interactive
             {
                 //If the player hasn't understood that he presses F to forward conversations and takes too long to forward
                 //the next one, this will appear.
-                GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("Press F to continue the conversation");
+                playerController.DisplayTip("Press F to continue the conversation");
             }
         }
 
@@ -357,7 +368,7 @@ public class TutorialController : Interactive
             {
                 //If the player hasn't understood that he presses F to forward conversations and takes too long to forward
                 //the next one, this will appear.
-                GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("Press F to continue the conversation");
+                playerController.DisplayTip("Press F to continue the conversation");
             }
         }
 
@@ -368,7 +379,7 @@ public class TutorialController : Interactive
             {
                 //If the player hasn't understood that he presses F to forward conversations and takes too long to forward
                 //the next one, this will appear.
-                GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("Press F to continue the conversation");
+                playerController.DisplayTip("Press F to continue the conversation");
             }
         }
 
@@ -379,7 +390,7 @@ public class TutorialController : Interactive
             {
                 //If the player hasn't understood that he presses F to forward conversations and takes too long to forward
                 //the next one, this will appear.
-                GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("Press F to continue the conversation");
+                playerController.DisplayTip("Press F to continue the conversation");
             }
         }
     }
@@ -388,7 +399,7 @@ public class TutorialController : Interactive
     {
         if (currentEvent == 0)
         {
-            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("");
+            playerController.DisplayTip("");
             currentLine = "Now,|0.1| allow me to turn on the lights.";
             StartCoroutine(CheckIfThePlayerTakesTooLong());
             currentEvent++;
@@ -396,7 +407,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 1)
         {
-            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("");
+            playerController.DisplayTip("");
             currentLine = "";
             StartCoroutine(ManageEvents());
         }
@@ -410,9 +421,9 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 3)
         {
-            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("");
+            playerController.DisplayTip("");
             currentLine = "";
-            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("Use W, A, S and D to move");
+            playerController.DisplayTip("Use W, A, S and D to move");
             StartCoroutine(ManageEvents());
         }
 
@@ -425,7 +436,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 5)
         {
-            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("");
+            playerController.DisplayTip("");
             currentLine = "";
             StartCoroutine(ManageEvents());
         }
@@ -457,7 +468,7 @@ public class TutorialController : Interactive
         else if (currentEvent == 10)
         {
             currentLine = "";
-            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("Press Left Click to attack");
+            playerController.DisplayTip("Press Left Click to attack");
             if (!dummySpawned)
             {
                 dummy.SetActive(true);
@@ -477,7 +488,7 @@ public class TutorialController : Interactive
             //  Use this call for wherever a player triggers a custom event
 
             AnalyticsUtils.RegisterDummyEvent();
-
+            playerController.DisplayTip("");
             currentLine = "You're done?|0.4| Okay.|0.2| Next step is real combat.";
             dummy.SetActive(false);
             currentEvent = 14;
@@ -493,14 +504,14 @@ public class TutorialController : Interactive
         else if (currentEvent == 14)
         {
             currentLine = "I'll create an enemy for you.";
-            GameObject.Find("Player").GetComponent<PlayerController>().DisplayWarning("Finishing this conversation will spawn an enemy");
+            playerController.DisplayWarning("Finishing this conversation will spawn an enemy");
             currentEvent++;
         }
 
         else if (currentEvent == 15)
         {
             currentLine = "";
-            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("");
+            playerController.DisplayTip("");
             if (!firstEnemy.activeInHierarchy)
             {
                 firstEnemy.SetActive(true);
@@ -513,7 +524,7 @@ public class TutorialController : Interactive
         {
             if (!firstEnemy)
             {
-                GameObject.Find("Player").GetComponent<PlayerController>().ReplenishHealth();
+                playerController.ReplenishHealth();
                 currentLine = "Good punch!|0.4| Now:|0.2| dashing.";
                 currentEvent = 18;
             }
@@ -553,15 +564,15 @@ public class TutorialController : Interactive
         {
 
             currentLine = "";
-            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("Press LeftShift to dash");
+            playerController.DisplayTip("Press LeftShift to dash");
             currentEvent = 1007;
         }
 
         else if (currentEvent == 1007)
         {
-            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("");
+            playerController.DisplayTip("");
             //currentLine = "You become @<b>i</b>@@<b>n</b>@@<b>v</b>@@<b>u</b>@@<b>l</b>@@<b>n</b>@@<b>e</b>@@<b>r</b>@@<b>a</b>@@<b>b</b>@@<b>l</b>@@<b>e</b>@ for a short time after dashing, so you can use it to avoid damage.";
-            currentLine = "You become invulnerable for a short time after dashing, so you can use it to avoid damage.";
+            currentLine = "You become invulnerable for a short time after dashing.";
             currentEvent = 20;
         }
 
@@ -575,7 +586,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 1001)
         {
-            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("");
+            playerController.DisplayTip("");
             currentLine = "";
             StartCoroutine(ManageEvents());
         }
@@ -583,7 +594,7 @@ public class TutorialController : Interactive
         else if (currentEvent == 21)
         {
             currentLine = "I'll spawn another basic enemy for you to practice.";
-            GameObject.Find("Player").GetComponent<PlayerController>().DisplayWarning("Finishing the conversation will spawn an enemy");
+            playerController.DisplayWarning("Finishing the conversation will spawn an enemy");
             currentEvent = 1002 ;
         }
 
@@ -596,9 +607,9 @@ public class TutorialController : Interactive
         else if (currentEvent == 22)
         {
             currentLine = "";
-            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("Press LeftShift to dash");
+            playerController.DisplayTip("Press LeftShift to dash");
             secondEnemy = (GameObject)Instantiate(secondEnemyPrefab, secondEnemySpawner.transform.position, Quaternion.identity);
-            Debug.Log(secondEnemy.transform.position);
+            //Debug.Log(secondEnemy.transform.position);
             currentEvent++;
         }
 
@@ -614,9 +625,10 @@ public class TutorialController : Interactive
             //If the second enemy was already defeated
             else
             {
-                if (GameObject.Find("Player").GetComponent<PlayerController>().GetBlockedAttacks() > 0)
+                if (playerController.GetBlockedAttacks() > 0)
                 {
-                    GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("");
+                    playerController.DisplayTip("");
+                    playerController.ReplenishHealth();
                     currentLine = "Well done!|0.2| Final lesson then:|0.3| power ups.";
                     currentEvent = 25;
                 }
@@ -624,8 +636,8 @@ public class TutorialController : Interactive
                 else
                 {
                     currentLine = "Not so easy to dash through attacks, huh?|0.4| Here, try again.";
-                    GameObject.Find("Player").GetComponent<PlayerController>().ReplenishHealth();
-                    GameObject.Find("Player").GetComponent<PlayerController>().DisplayWarning("Finishing the conversation will spawn an enemy");
+                    playerController.ReplenishHealth();
+                    playerController.DisplayWarning("Finishing the conversation will spawn an enemy");
                     currentEvent = 22;
                 }
             }
@@ -657,7 +669,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 1004)
         {
-            currentLine = "Yep, that'll show how many power ups you have on.";
+            currentLine = "Next step:|0.3| seeing power ups.";
             currentEvent = 1005;
         }
 
@@ -671,13 +683,13 @@ public class TutorialController : Interactive
         {
             visorUI.SetActive(true);
             currentLine = "";
-            GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("Hold LeftCtrl or MouseWheel to see power ups");
-            currentEvent--;
+            playerController.DisplayTip("Hold LeftCtrl to see power ups");
+            currentEvent = 1005;
         }
 
         else if (currentEvent == 28)
         {
-            currentLine = "That's it. Now pick them up to get faster.";
+            currentLine = "Pick them up and they'll make you faster.";
             currentEvent++;
         }
 
@@ -689,37 +701,123 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 30)
         {
-            currentLine = "Welp, that's as far as the demo goes right now. ";
+            currentLine = "Yeah!|0.2| Now, how would it be to fight|0.1| WITH|0.1| power ups on?";
             currentEvent++;
         }
 
         else if (currentEvent == 31)
         {
-            currentLine = "Thank you for playing!|0.2| I'll be adding the following stuff soon:";
+            //currentLine = "Thank you for playing!|0.2| I'll be adding the following stuff soon:";
+            lastCheckpoint = 31;
+            currentLine = "Find out for yourself!";
+            playerController.DisplayWarning("Finishing this conversation will spawn an enemy");
             currentEvent++;
         }
 
         else if (currentEvent == 32)
         {
             currentLine = "";
+            playerController.DisplayTip("");
+            SpawnFirstPowerUpEnemies();
             currentEvent++;
         }
 
         else if (currentEvent == 33)
         {
-            currentLine = "Enemies grunt when you kill them. Enemies do not dissappear instantly, but are pushed by your punches.";
-            currentEvent++;
+         //   currentLine = "Enemies grunt when you kill them. Enemies do not dissappear instantly, but are pushed by your punches.";
+            if(FirstPowerUpEnemiesWereDefeated())
+            {
+                currentLine = "That was awesome!";
+                currentEvent++;
+            }
+
+            else
+            {
+                currentLine = "Fight!!";
+                currentEvent--;
+            }
+
+            //currentEvent++;
         }
 
         else if (currentEvent == 34)
         {
-            currentLine = "Footsteps sound effects. Small practice with enemies using the power up mechanic. After that, final challenge with lots of enemies and a cool soundtrack.";
+            currentLine = "This is as far as the demo goes right now. Thank you so much for playing!";
+           // currentLine = "Footsteps sound effects. Small practice with enemies using the power up mechanic. After that, final challenge with lots of enemies and a cool soundtrack.";
             currentEvent++;
         }
 
         else if (currentEvent == 35)
         {
+            currentLine = "For feedback, you can comment the project at itch.io or answer the form at https://goo.gl/vriZqH";
+            currentEvent++;
+        }
 
+        else if (currentEvent == 36)
+        {
+            currentLine = "Or, you can send an email to the developer at ramell.jack@gmail.com!|0.3| He'd be really happy!";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 37)
+        {
+            currentLine = "I'll now talk about coming features and the credits, so I'll give you a chance to quit in case you're not interested";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 38)
+        {
+            currentLine = "";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 39)
+        {
+            currentLine = "Soon a big final challenge will be available so you can test everything learned in the demo at a greater scale.";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 40)
+        {
+            currentLine = "Also, game feel will be improved through the addition footsteps sound effects and betterment of game feedback enemies are hit";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 41)
+        {
+            currentLine = "Better credits, animations and optimization are a must,|0.1| but they'll take a little longer.";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 42)
+        {
+            currentLine = "Finally, here is a link to the credits: https://goo.gl/X6Xap1.|0.1| They are also at the project page in itch.io";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 43)
+        {
+            currentLine = "I know this is not a pretty way to do it, but releasing any kind of build without them would be unethical.";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 44)
+        {
+            //currentLine = "I'll give you a chance to quit again, in case you're not interested.";
+            currentLine = "";
+            currentEvent = 42;
+        }
+
+        else if (currentEvent == 45)
+        {
+            currentLine = "";
+            currentEvent++;
+        }
+
+        else if (currentEvent == 46)
+        {
+            currentLine = "Here is a link to the credits: https://goo.gl/X6Xap1";
+            currentEvent++;
         }
 
         if (currentLine == "")
@@ -735,10 +833,7 @@ public class TutorialController : Interactive
 
     public void RegisterDummyPunch()
     {
-        GameObject.Find("Player").GetComponent<PlayerController>().DisplayTip("");
-
-
-
+        playerController.DisplayTip("");
         currentEvent = 12;
     }
 
@@ -750,5 +845,35 @@ public class TutorialController : Interactive
     public static int GetCurrentEvent()
     {
         return currentEvent;
+    }
+
+    public void PressedLeftCtrl()
+    {
+        if(currentEvent == 1005)
+        {
+        currentEvent = 28;
+            playerController.DisplayTip("Touch a power up to get faster");
+        }
+    }
+
+    public void PlayerTouchedPowerUp()
+    {
+        if (currentEvent == 28)
+        {
+            currentEvent = 30;
+        }
+    }
+
+    private void SpawnFirstPowerUpEnemies()
+    {
+        if(!FirstPowerUpEnemiesWereDefeated())
+        {
+            firstPowerUpEnemies.SetActive(true);
+        }
+    }
+
+    private bool FirstPowerUpEnemiesWereDefeated()
+    {
+        return firstPowerUpEnemies.transform.childCount == 0;
     }
 }
