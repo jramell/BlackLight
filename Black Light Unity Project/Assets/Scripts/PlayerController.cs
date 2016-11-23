@@ -168,6 +168,9 @@ public class PlayerController : MonoBehaviour
 
     private bool isChargingStacks;
 
+    //The effect the speed stacks are having
+    private float effect;
+
     //Is the game paused?
     private bool isPaused;
 
@@ -223,7 +226,8 @@ public class PlayerController : MonoBehaviour
 
     private bool shouldSkipText;
 
-
+    //Used to store the force applied to the enemies when they die
+    private Vector3 force;
 
     //Traslation vector, updated each frame
     private Vector3 translate;
@@ -246,7 +250,7 @@ public class PlayerController : MonoBehaviour
     //--------------------------------------------------------------------------------------------------------------
 
     //Should Unity Analytics be active?
-    public const bool ANALYTICS_ACTIVE = true;
+    public const bool ANALYTICS_ACTIVE = false;
 
     //Name of the event that is registered when the player talks to Blue after he spawns the dummy.
     public const string PUNCH_DUMMY_EVENT_NAME = "Talk after dummy punch";
@@ -277,6 +281,8 @@ public class PlayerController : MonoBehaviour
     {
         contrastEnhance = transform.Find("Main Camera").gameObject.GetComponent<ContrastEnhance>();
         tutorialController = GameObject.Find("BlueP").GetComponent<TutorialController>();
+        movementEnabled = true;
+        cameraMovementEnabled = true;
     }
 
     void Start()
@@ -286,8 +292,6 @@ public class PlayerController : MonoBehaviour
         canInteract = true;
         objectTalkingTo = null;
         introducingText = false;
-        movementEnabled = true;
-        cameraMovementEnabled = true;
         maxHealthPoints = healthPoints;
         //    baseForwardDashForce = forwardDashForce;
         //  baseLateralDashForce = lateralDashForce;
@@ -610,10 +614,23 @@ public class PlayerController : MonoBehaviour
         {
             lastAttack = Time.time;
 
-            if (hit.collider != null && hit.collider.tag == "Enemy" && hit.distance < attackRange)
+            if (hit.collider != null && hit.collider.tag == ENEMY_TAG && hit.distance < attackRange)
             {
                 crosshairSuccess.enabled = true;
                 attackSuccess.Play();
+                force = hit.collider.gameObject.transform.position - hit.point;
+
+                if (force.y < 0)
+                {
+                    force.y *= -1;
+                }
+
+                //force.y = Random.Range(0.1f, 1);
+                force *= Random.Range(500, 1000) * effect;
+                //Debug.Log("hit with force: " + force);
+                //force = force.
+                //hit.collider.gameObject.GetComponent<BasicEnemyController>().TakeDamageWithEffect(force, attack);
+                // hit.collider.gameObject.GetComponent<BasicEnemyController>().TakeDamage(attack);
                 hit.collider.gameObject.SendMessage("TakeDamage", attack);
                 yield return new WaitForSeconds(0.2f);
                 crosshairSuccess.enabled = false;
@@ -968,7 +985,7 @@ public class PlayerController : MonoBehaviour
             speedPowerUpStacks = maxSpeedStacks;
         }
 
-        float effect = 1 + speedStackEffect * speedPowerUpStacks;
+        effect = 1 + speedStackEffect * speedPowerUpStacks;
 
         speed = baseSpeed * effect;
         dashStackChargingTime = baseDashChargingTime / effect;

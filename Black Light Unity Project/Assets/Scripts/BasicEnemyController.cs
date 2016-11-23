@@ -26,12 +26,18 @@ public class BasicEnemyController : MonoBehaviour
 
     private bool isDead;
 
+    private Rigidbody rigidbody;
+
     //Starts attacking when player is closer than this distance
     public float distanceToAttack;
 
     //Unused something
     private bool seriousFight;
 
+    void Awake()
+    {
+        rigidbody = GetComponent<Rigidbody>();
+    }
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player");
@@ -41,8 +47,12 @@ public class BasicEnemyController : MonoBehaviour
 
     void Update()
     {
+        if(!isDead)
+        {
         transform.LookAt(player.transform.position);
         Attack();
+
+        }
     }
 
     void Attack()
@@ -79,7 +89,26 @@ public class BasicEnemyController : MonoBehaviour
         Destroy(gameObject);
     }
 
-    void TakeDamage(int damage)
+    public void TakeDamageWithEffect(Vector3 force, int damage)
+    {
+        health -= damage;
+
+        if (health <= 0)
+        {
+            DieWithEffect(force);
+        }
+    }
+
+    void DieWithEffect(Vector3 force)
+    {
+        isDead = true;
+        PlayerController.InformEnemyDeath();
+        rigidbody.freezeRotation = false;
+        rigidbody.AddForce(force, ForceMode.Acceleration);
+        Destroy(gameObject, 1f);
+    }
+
+    public void TakeDamage(int damage)
     {
         health -= damage;
 

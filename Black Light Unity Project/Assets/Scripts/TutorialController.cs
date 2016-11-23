@@ -150,7 +150,7 @@ public class TutorialController : Interactive
     {
         if (currentEvent == 0)
         {
-            Debug.Log("starts 0 event");
+           // Debug.Log("starts 0 event");
             //So the player can't interact with it at first
             gameObject.tag = "Untagged";
             SetPlayerMovement(false);
@@ -761,7 +761,7 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 37)
         {
-            currentLine = "I'll now talk about coming features and the credits, so I'll give you a chance to quit in case you're not interested";
+            currentLine = "I'll now talk about coming features, so I'll give you a chance to quit in case you're not interested";
             currentEvent++;
         }
 
@@ -791,14 +791,15 @@ public class TutorialController : Interactive
 
         else if (currentEvent == 42)
         {
-            currentLine = "Finally, here is a link to the credits: https://goo.gl/X6Xap1.|0.1| They are also at the project page in itch.io";
+            currentLine = "Remember, for feedback you can comment the project at itch.io or answer the form at https://goo.gl/vriZqH";
             currentEvent++;
         }
 
         else if (currentEvent == 43)
         {
-            currentLine = "I know this is not a pretty way to do it, but releasing any kind of build without them would be unethical.";
-            currentEvent++;
+            //currentLine = "I know this is not a pretty way to do it, but releasing any kind of build without them would be unethical.";
+            currentLine = "";
+            currentEvent--;
         }
 
         else if (currentEvent == 44)

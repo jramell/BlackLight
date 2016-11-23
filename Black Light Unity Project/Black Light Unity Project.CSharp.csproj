@@ -68,6 +68,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\AttackMover.cs" />
     <Compile Include="Assets\Scripts\BasicEnemyController.cs" />
+    <Compile Include="Assets\Scripts\CreditsController.cs" />
     <Compile Include="Assets\Scripts\DummyController.cs" />
     <Compile Include="Assets\Scripts\GameState.cs" />
     <Compile Include="Assets\Scripts\ImageEffects\Scripts\Antialiasing.cs" />
